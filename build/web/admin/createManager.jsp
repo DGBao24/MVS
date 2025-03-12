@@ -2,7 +2,10 @@
 <%@page import= "entity.Account" %>
 <%
     Account user = (Account) session.getAttribute("account");
-    if (user == null || !"Admin".equals(user.getRole()) && !"Manager".equals(user.getRole())) {
+    if (user == null ){
+    response.sendRedirect("login.jsp");
+    }
+    if(!"Admin".equals(user.getRole())) {
         response.sendRedirect("error.jsp");
         return;
     }
