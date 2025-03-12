@@ -19,6 +19,44 @@
                 <jsp:include page="topbar.jsp" />
                 <div class="container-fluid">
                     <h1 class="h3 mb-4 text-gray-800">Showtime Management</h1>
+                    <div class="card border-left-primary shadow h-100 py-2">
+    <div class="card-body">
+        <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                    Add New Showtime
+                </div>
+                <form action="showtime" method="POST" id="addShowtimeForm">
+                    <input type="hidden" name="service" value="insertShowtime">
+                    <input type="hidden" name="submit" value="true">
+
+                    <div class="form-group">
+                        <label for="MovieID">Movie ID:</label>
+                        <input type="number" class="form-control" name="MovieID" id="MovieID" 
+                               placeholder="Enter Movie ID" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="StartTime">Start Time:</label>
+                        <input type="datetime-local" class="form-control" name="StartTime" id="StartTime" 
+                               required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="EndTime">End Time:</label>
+                        <input type="datetime-local" class="form-control" name="EndTime" id="EndTime" 
+                               required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Add Showtime</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+                    
+                    
                     <table class="table table-bordered" id="showtimeTable" width="100%" cellspacing="0">
                         <thead>
                             <tr>
@@ -39,9 +77,10 @@
                                             <td>${showtime.startTime}</td>
                                             <td>${showtime.endTime}</td>
                                             <td>
-                                                <a href="showtime?service=updateShowtime&showtimeID=${showtime.showtimeID}" class="btn btn-primary btn-sm">
-                                                    <i class="fas fa-edit"></i> Update
+                                                <a href="updateshowtime.jsp?showtimeID=${showtime.showtimeID}" class="btn btn-primary btn-sm">
+                                                  <i class="fas fa-edit"></i> Update
                                                 </a>
+
                                                 <form action="showtime?service=deleteShowtime" method="POST" style="display:inline;">
                                                     <input type="hidden" name="id" value="${showtime.showtimeID}">
                                                     <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this showtime?');">
@@ -57,6 +96,7 @@
                                         <td colspan="5" class="text-center">No showtimes available</td>
                                     </tr>
                                 </c:otherwise>
+                                    
                             </c:choose>
                         </tbody>
                     </table>
