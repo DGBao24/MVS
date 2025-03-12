@@ -137,6 +137,7 @@
                                                         <a href="room?service=DisableStatus&rid=<%= room.getRoomID() %>&cinemaId=<%= selectedCinemaId != null ? selectedCinemaId : "" %>" class="btn btn-warning btn-sm">
                                                             <%= room.isStatus() ? "Deactivate" : "Activate" %>
                                                         </a>
+                                                        <a href="${pageContext.request.contextPath}/seat?service=listAll&RoomID=<%= room.getRoomID() %>" class="btn btn-primary btn-sm">View Seat</a>
                                                     </td>
                                                 </tr>
                                             <% }
