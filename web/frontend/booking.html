@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Tickets - CinemaHub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-dark text-light">
+    <!-- Navigation Bar (Same as other pages) -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top border-bottom border-secondary">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <i class="bi bi-film"></i> CinemaHub
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="movies.html">Movies</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="my-bookings.html">My Bookings</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="contact.html">Contact Us</a>
+                    </li>
+                     <!-- Add Login/Account Button -->
+                     <li class="nav-item ms-lg-3">
+                        <div class="d-flex">
+                            <button id="loginBtn" class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#loginModal">
+                                <i class="bi bi-person"></i> Login
+                            </button>
+                            <div id="accountDropdown" class="dropdown d-none">
+                                <button class="btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-person-circle"></i> My Account
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-dark">
+                                    <li><a class="dropdown-item" href="profile.html">Change Profile</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="#" id="logoutBtn">Logout</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="#">Membership</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Booking Progress -->
+    <div class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="d-flex justify-content-between position-relative mb-4">
+                    <div class="text-center">
+                        <div class="badge bg-success rounded-circle p-3 mb-2">1</div>
+                        <div>Seats</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="badge bg-success rounded-circle p-3 mb-2">2</div>
+                        <div>Combos</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="badge bg-primary rounded-circle p-3 mb-2">3</div>
+                        <div>Payment</div>
+                    </div>
+                    <div class="progress position-absolute top-50 start-0 end-0" style="height: 2px; z-index: -1;">
+                        <div class="progress-bar" role="progressbar" style="width: 66%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Seat Selection -->
+    <section class="py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8">
+                    <!-- Screen -->
+                    <div class="text-center mb-5">
+                        <div class="screen-container">
+                            <div class="screen mb-4" style="height: 10px; background: #7952b3; border-radius: 5px;"></div>
+                            <p class="text-muted">SCREEN</p>
+                        </div>
+                    </div>
+
+                    <!-- Seat Map -->
+                    <div class="seat-map text-center mb-4">
+                        <!-- Row A -->
+                        <div class="mb-3">
+                            <span class="me-3">A</span>
+                            <button class="seat available"></button>
+                            <button class="seat available"></button>
+                            <button class="seat occupied"></button>
+                            <button class="seat available"></button>
+                            <button class="seat available"></button>
+                            <button class="seat available"></button>
+                            <button class="seat available"></button>
+                            <button class="seat available"></button>
+                        </div>
+                        <!-- Repeat for other rows -->
+                    </div>
+
+                    <!-- Seat Legend -->
+                    <div class="d-flex justify-content-center gap-4">
+                        <div class="d-flex align-items-center">
+                            <div class="seat available me-2"></div>
+                            <span>Available</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="seat selected me-2"></div>
+                            <span>Selected</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="seat occupied me-2"></div>
+                            <span>Occupied</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Booking Summary -->
+                <div class="col-lg-4">
+                    <div class="card bg-dark border-secondary">
+                        <div class="card-header border-secondary">
+                            <h5 class="mb-0">Booking Summary</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <img src="https://via.placeholder.com/100x150" class="me-3" alt="Movie Poster">
+                                <div>
+                                    <h6>Movie Title</h6>
+                                    <p class="text-muted mb-0">Today, 7:15 PM</p>
+                                </div>
+                            </div>
+                            <hr class="border-secondary">
+                            <div class="mb-3">
+                                <h6>Selected Seats</h6>
+                                <p class="mb-0">A4, A5 <span class="text-muted">(2 tickets)</span></p>
+                            </div>
+                            <hr class="border-secondary">
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Tickets (2)</span>
+                                    <span>$30.00</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Booking Fee</span>
+                                    <span>$2.00</span>
+                                </div>
+                                <div class="d-flex justify-content-between fw-bold">
+                                    <span>Total</span>
+                                    <span>$32.00</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn btn-primary w-100">Continue to Food & Beverages</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Combo Selection -->
+    <section class="py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8">
+                    <h4 class="mb-4">Select Your Combos</h4>
+                    <div class="row g-4">
+                        <!-- Combo 1 -->
+                        <div class="col-md-6">
+                            <div class="card bg-dark border-secondary h-100">
+                                <div class="position-relative">
+                                    <img src="https://via.placeholder.com/400x300" class="card-img-top" alt="Combo 1">
+                                    <span class="badge bg-warning text-dark position-absolute top-0 end-0 m-2">Popular</span>
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title">Popcorn Combo</h5>
+                                    <ul class="list-unstyled text-muted small">
+                                        <li><i class="bi bi-check2-circle text-success me-2"></i>Large Popcorn</li>
+                                        <li><i class="bi bi-check2-circle text-success me-2"></i>2 Medium Drinks</li>
+                                        <li><i class="bi bi-check2-circle text-success me-2"></i>1 Candy</li>
+                                    </ul>
+                                    <div class="d-flex justify-content-between align-items-center mt-3">
+                                        <span class="h5 mb-0">$15.99</span>
+                                        <div class="input-group" style="width: 120px;">
+                                            <button class="btn btn-outline-secondary" type="button" onclick="updateComboQuantity('combo1', -1)">-</button>
+                                            <input type="number" class="form-control bg-dark text-light text-center" id="combo1" value="0" min="0" max="5">
+                                            <button class="btn btn-outline-secondary" type="button" onclick="updateComboQuantity('combo1', 1)">+</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Combo 2 -->
+                        <div class="col-md-6">
+                            <div class="card bg-dark border-secondary h-100">
+                                <div class="position-relative">
+                                    <img src="https://via.placeholder.com/400x300" class="card-img-top" alt="Combo 2">
+                                    <span class="badge bg-danger position-absolute top-0 end-0 m-2">Best Value</span>
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title">Nachos Combo</h5>
+                                    <ul class="list-unstyled text-muted small">
+                                        <li><i class="bi bi-check2-circle text-success me-2"></i>Nachos with Cheese</li>
+                                        <li><i class="bi bi-check2-circle text-success me-2"></i>2 Medium Drinks</li>
+                                        <li><i class="bi bi-check2-circle text-success me-2"></i>1 Hot Dog</li>
+                                    </ul>
+                                    <div class="d-flex justify-content-between align-items-center mt-3">
+                                        <span class="h5 mb-0">$18.99</span>
+                                        <div class="input-group" style="width: 120px;">
+                                            <button class="btn btn-outline-secondary" type="button" onclick="updateComboQuantity('combo2', -1)">-</button>
+                                            <input type="number" class="form-control bg-dark text-light text-center" id="combo2" value="0" min="0" max="5">
+                                            <button class="btn btn-outline-secondary" type="button" onclick="updateComboQuantity('combo2', 1)">+</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Summary -->
+                <div class="col-lg-4">
+                    <div class="card bg-dark border-secondary sticky-top" style="top: 80px">
+                        <div class="card-header border-secondary">
+                            <h5 class="mb-0">Payment Summary</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Selected Seats (2)</span>
+                                <span>$30.00</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Combos</span>
+                                <span id="comboTotal">$0.00</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Booking Fee</span>
+                                <span>$2.00</span>
+                            </div>
+                            <hr class="border-secondary">
+                            <div class="d-flex justify-content-between mb-3">
+                                <span class="fw-bold">Total</span>
+                                <span class="fw-bold" id="totalAmount">$32.00</span>
+                            </div>
+
+                            <!-- Promo Code -->
+                            <div class="mb-3">
+                                <div class="input-group">
+                                    <input type="text" class="form-control bg-dark text-light border-secondary" placeholder="Promo code">
+                                    <button class="btn btn-outline-secondary" type="button">Apply</button>
+                                </div>
+                            </div>
+
+                            <!-- Payment Methods -->
+                            <div class="mb-3">
+                                <h6 class="mb-3">Payment Method</h6>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="paymentMethod" id="creditCard" checked>
+                                    <label class="form-check-label d-flex align-items-center" for="creditCard">
+                                        <i class="bi bi-credit-card me-2"></i> Credit Card
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="paymentMethod" id="paypal">
+                                    <label class="form-check-label d-flex align-items-center" for="paypal">
+                                        <i class="bi bi-paypal me-2"></i> PayPal
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="paymentMethod" id="googlePay">
+                                    <label class="form-check-label d-flex align-items-center" for="googlePay">
+                                        <i class="bi bi-google me-2"></i> Google Pay
+                                    </label>
+                                </div>
+                            </div>
+
+                            <button class="btn btn-primary w-100" onclick="proceedToPayment()">
+                                Proceed to Payment
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer (Same as other pages) -->
+    <footer class="bg-dark text-light border-top border-secondary py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>CinemaHub</h5>
+                    <p>Your premier destination for movie entertainment.</p>
+                    <div class="social-links">
+                        <a href="#" class="text-light me-3"><i class="bi bi-facebook"></i></a>
+                        <a href="#" class="text-light me-3"><i class="bi bi-twitter"></i></a>
+                        <a href="#" class="text-light me-3"><i class="bi bi-instagram"></i></a>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <h5>Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-light text-decoration-none">About Us</a></li>
+                        <li><a href="#" class="text-light text-decoration-none">Terms & Conditions</a></li>
+                        <li><a href="#" class="text-light text-decoration-none">Privacy Policy</a></li>
+                        <li><a href="#" class="text-light text-decoration-none">FAQs</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>Contact Us</h5>
+                    <ul class="list-unstyled">
+                        <li><i class="bi bi-telephone"></i> +1 234 567 890</li>
+                        <li><i class="bi bi-envelope"></i> support@cinemahub.com</li>
+                        <li><i class="bi bi-geo-alt"></i> 123 Movie Street, Cinema City</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="text-center mt-4">
+                <p class="mb-0">&copy; 2025 CinemaHub. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

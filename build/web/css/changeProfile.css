@@ -1,0 +1,118 @@
+/*
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/CascadeStyleSheet.css to edit this template
+*/
+/* 
+    Created on : Feb 28, 2025, 1:17:16 PM
+    Author     : Nhat Anh
+*/
+
+body {
+                font-family: "Poppins", sans-serif;
+                color: #0c0c0c;
+                background-color: #ffffff;
+                margin: 0;
+                padding: 0;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+            }
+
+            body {
+                background-image: url('images/hero-bg.png');
+                background-size: cover; /* Lấp đầy toàn bộ trang */
+                background-position: center; /* Căn giữa ảnh */
+                background-attachment: fixed; /* Giữ ảnh nền cố định khi cuộn */
+            }
+
+
+            .container {
+
+                background: #ffffff;
+                padding: 30px;
+                border-radius: 10px;
+                box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+                width: 500px; /* Đổi kích thước container */
+            }
+            h2 {
+                text-align: center;
+                color: #333;
+                margin-bottom: 20px;
+            }
+            .form-group {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 10px;
+            }
+            .form-group label {
+                font-weight: bold;
+                color: #333;
+                width: 150px; /* Căn chỉnh tên bên trái */
+                flex-shrink: 0; /* Đảm bảo tên không bị thu nhỏ */
+            }
+            .form-group input{
+                width: calc(100% - 160px); /* Đảm bảo ô điền chiếm không gian còn lại */
+                padding: 8px;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+                background-color: #F8F8F8;
+            }
+            .form-group input:focus,
+            .form-group select:focus {
+                outline: none;
+                border-color: #007BFF;
+            }
+            .btn-container {
+                text-align: center;
+                margin-top: 20px;
+            }
+            .btn {
+                background-color:#c82333;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 5px;
+                cursor: pointer;
+                font-size: 16px;
+            }
+            .btn:hover {
+                background-color: #218838;
+            }
+            .form-control {
+                width: 100%;
+                padding: 8px 12px;
+                font-size: 14px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                background-color: #fff;
+            }
+            .form-group select{
+                background-color: #F8F8F8;
+            }
+            .form-group label {
+                font-size: 16px;
+                font-weight: bold;
+                margin-bottom: 8px;
+            }
+            .alert-banner {
+                width: 100%;
+                padding: 10px;
+                text-align: center;
+                font-size: 16px;
+                position: absolute;
+                top: 0;
+                left: 0;
+                z-index: 9999; /* Đảm bảo thông báo luôn hiển thị trên cùng */
+                border-radius: 0; /* Giảm bớt góc nếu muốn */
+            }
+
+            .alert-danger {
+                background-color: #f8d7da;
+                color: #721c24;
+            }
+
+            .alert-success {
+                background-color: #d4edda;
+                color: #155724;
+            }

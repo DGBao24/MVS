@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Bookings - CinemaHub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-dark text-light">
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top border-bottom border-secondary">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <i class="bi bi-film"></i> CinemaHub
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="movies.html">Movies</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="my-bookings.html">My Bookings</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="contact.html">Contact Us</a>
+                    </li>
+                    <!-- Add Login/Account Button -->
+                    <li class="nav-item ms-lg-3">
+                        <div class="d-flex">
+                            <button id="loginBtn" class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#loginModal">
+                                <i class="bi bi-person"></i> Login
+                            </button>
+                            <div id="accountDropdown" class="dropdown d-none">
+                                <button class="btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-person-circle"></i> My Account
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-dark">
+                                    <li><a class="dropdown-item" href="profile.html">Change Profile</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="#" id="logoutBtn">Logout</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="#">Membership</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- My Bookings Section -->
+    <section class="py-5">
+        <div class="container">
+            <h2 class="mb-4">My Bookings</h2>
+
+            <!-- Booking Filters -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="d-flex gap-3">
+                        <select class="form-select bg-dark text-light border-secondary" style="width: auto;">
+                            <option>All Bookings</option>
+                            <option>Upcoming</option>
+                            <option>Past</option>
+                            <option>Cancelled</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <input type="text" class="form-control bg-dark text-light border-secondary" placeholder="Search bookings...">
+                        <button class="btn btn-outline-secondary" type="button">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upcoming Bookings -->
+            <div class="mb-5">
+                <h4 class="mb-4">Upcoming Shows</h4>
+                <div class="row g-4">
+                    <!-- Upcoming Booking Card -->
+                    <div class="col-md-6">
+                        <div class="card bg-dark h-100 border-secondary booking-card">
+                            <div class="row g-0">
+                                <div class="col-md-4">
+                                    <img src="https://via.placeholder.com/300x450" class="img-fluid rounded-start" alt="Movie Poster">
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <h5 class="card-title mb-0">Movie Title</h5>
+                                            <span class="badge bg-success">Confirmed</span>
+                                        </div>
+                                        <ul class="list-unstyled text-muted small mb-3">
+                                            <li><i class="bi bi-calendar3 me-2"></i>March 15, 2025</li>
+                                            <li><i class="bi bi-clock me-2"></i>7:15 PM</li>
+                                            <li><i class="bi bi-ticket-perforated me-2"></i>2 Tickets (A4, A5)</li>
+                                            <li><i class="bi bi-basket2 me-2"></i>1x Popcorn Combo</li>
+                                        </ul>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="text-muted small">Booking ID: #12345</span>
+                                            <div>
+                                                <button class="btn btn-sm btn-outline-danger me-2" onclick="cancelBooking('12345')">
+                                                    Cancel
+                                                </button>
+                                                <button class="btn btn-sm btn-primary" onclick="showQRCode('12345')">
+                                                    Show QR
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Past Bookings -->
+            <div>
+                <h4 class="mb-4">Past Shows</h4>
+                <div class="row g-4">
+                    <!-- Past Booking Card -->
+                    <div class="col-md-6">
+                        <div class="card bg-dark h-100 border-secondary booking-card">
+                            <div class="row g-0">
+                                <div class="col-md-4">
+                                    <img src="https://via.placeholder.com/300x450" class="img-fluid rounded-start" alt="Movie Poster">
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <h5 class="card-title mb-0">Past Movie</h5>
+                                            <span class="badge bg-secondary">Completed</span>
+                                        </div>
+                                        <ul class="list-unstyled text-muted small mb-3">
+                                            <li><i class="bi bi-calendar3 me-2"></i>March 1, 2025</li>
+                                            <li><i class="bi bi-clock me-2"></i>4:30 PM</li>
+                                            <li><i class="bi bi-ticket-perforated me-2"></i>3 Tickets (B6, B7, B8)</li>
+                                            <li><i class="bi bi-basket2 me-2"></i>2x Nachos Combo</li>
+                                        </ul>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="text-muted small">Booking ID: #12344</span>
+                                            <div>
+                                                <button class="btn btn-sm btn-outline-light" onclick="rateMovie('12344')">
+                                                    Rate Movie
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- QR Code Modal -->
+    <div class="modal fade" id="qrCodeModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title">Booking QR Code</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img src="https://via.placeholder.com/200" alt="QR Code" class="img-fluid mb-3">
+                    <p class="mb-0">Show this QR code at the cinema entrance</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rate Movie Modal -->
+    <div class="modal fade" id="rateMovieModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title">Rate Movie</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Your Rating</label>
+                        <div class="rating-stars mb-3">
+                            <i class="bi bi-star-fill text-warning me-1" data-rating="1"></i>
+                            <i class="bi bi-star-fill text-warning me-1" data-rating="2"></i>
+                            <i class="bi bi-star-fill text-warning me-1" data-rating="3"></i>
+                            <i class="bi bi-star-fill text-warning me-1" data-rating="4"></i>
+                            <i class="bi bi-star text-warning" data-rating="5"></i>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="reviewText" class="form-label">Your Review</label>
+                        <textarea class="form-control bg-dark text-light border-secondary" id="reviewText" rows="3"></textarea>
+                    </div>
+                    <button class="btn btn-primary w-100">Submit Review</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light border-top border-secondary py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>CinemaHub</h5>
+                    <p>Your premier destination for movie entertainment.</p>
+                    <div class="social-links">
+                        <a href="#" class="text-light me-3"><i class="bi bi-facebook"></i></a>
+                        <a href="#" class="text-light me-3"><i class="bi bi-twitter"></i></a>
+                        <a href="#" class="text-light me-3"><i class="bi bi-instagram"></i></a>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <h5>Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-light text-decoration-none">About Us</a></li>
+                        <li><a href="#" class="text-light text-decoration-none">Terms & Conditions</a></li>
+                        <li><a href="#" class="text-light text-decoration-none">Privacy Policy</a></li>
+                        <li><a href="#" class="text-light text-decoration-none">FAQs</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>Contact Us</h5>
+                    <ul class="list-unstyled">
+                        <li><i class="bi bi-telephone"></i> +1 234 567 890</li>
+                        <li><i class="bi bi-envelope"></i> support@cinemahub.com</li>
+                        <li><i class="bi bi-geo-alt"></i> 123 Movie Street, Cinema City</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="text-center mt-4">
+                <p class="mb-0">&copy; 2025 CinemaHub. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
