@@ -5,18 +5,18 @@ import java.sql.Timestamp;
 public class Showtime {
     private int showtimeID;
     private int movieID;
-    private String startTime;
-    private String endTime;
+    private Timestamp startTime;
+    private Timestamp endTime;
 
     // Constructors
-    public Showtime(int showtimeID, int movieID, String startTime, String endTime) {
+    public Showtime(int showtimeID, int movieID, Timestamp startTime, Timestamp endTime) {
         this.showtimeID = showtimeID;
         this.movieID = movieID;
         this.startTime = startTime;
         this.endTime = endTime;
     }
 
-    public Showtime(int movieID, String startTime, String endTime) {
+    public Showtime(int movieID, Timestamp startTime, Timestamp endTime) {
         this.movieID = movieID;
         this.startTime = startTime;
         this.endTime = endTime;
@@ -39,19 +39,19 @@ public class Showtime {
         this.movieID = movieID;
     }
 
-    public String getStartTime() {
+    public Timestamp getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(String startTime) {
+    public void setStartTime(Timestamp startTime) {
         this.startTime = startTime;
     }
 
-    public String getEndTime() {
+    public Timestamp getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(String endTime) {
+    public void setEndTime(Timestamp endTime) {
         this.endTime = endTime;
     }
 }
