@@ -73,7 +73,7 @@
         </a>
     </li>
     <li class="nav-item">
-        <a class="nav-link" href="${pageContext.request.contextPath}/admin/seat-management.jsp">
+        <a class="nav-link" href="${pageContext.request.contextPath}/seat?service=listAll&RoomID=">
            
             <span>Seat Management</span>
         </a>
