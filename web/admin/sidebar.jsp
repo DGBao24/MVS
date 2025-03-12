@@ -62,14 +62,20 @@
     <!-- Nav Item - Cinema Management -->
     <li class="nav-item">
         <a class="nav-link" href="${pageContext.request.contextPath}/CinemaManageController">
-            <i class="fas fa-fw fa-building"></i>
+            
             <span>Cinema Manage</span>
         </a>
     </li>
     <li class="nav-item">
         <a class="nav-link" href="${pageContext.request.contextPath}/room?service=listAll&cinemaId=">
-            <i class="fas fa-fw fa-box"></i>
+            
             <span>Room Management</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="${pageContext.request.contextPath}/admin/seat-management.jsp">
+           
+            <span>Seat Management</span>
         </a>
     </li>
     <!-- Divider -->
