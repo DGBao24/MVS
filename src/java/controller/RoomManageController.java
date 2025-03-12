@@ -124,7 +124,7 @@ public class RoomManageController extends HttpServlet {
                 }
             }
 
-            List<Room> rooms = dao.getRoomsByCinemaID(cinemaId);
+            List<Room> rooms = dao.getRoomsByCinema(cinemaId);
             request.setAttribute("Room", rooms);
             request.getRequestDispatcher("admin/room-management.jsp").forward(request, response);
 

@@ -17,9 +17,9 @@ public class CinemaRoomDAO extends DBConnection {
         String sql = "INSERT INTO [dbo].[CinemaRoom]([CinemaID],[RoomName],[RoomType],[Status]) VALUES (?, ?, ?, ?)";
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setInt(1, room.getCinemaID());
+            ps.setInt(1, room.getCinemaID());          
             ps.setString(2, room.getRoomName());
-            ps.setString(3, room.getRoomType());
+            ps.setString(3, room.getRoomType());          
             ps.setBoolean(4, room.isStatus());
             affectedRow = ps.executeUpdate();
         } catch (SQLException ex) {
@@ -35,7 +35,7 @@ public class CinemaRoomDAO extends DBConnection {
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, room.getRoomName());
             ps.setString(2, room.getRoomType());
-
+            
             ps.setInt(3, room.getRoomID());
             affectedRow = ps.executeUpdate();
         } catch (SQLException ex) {
@@ -44,11 +44,11 @@ public class CinemaRoomDAO extends DBConnection {
         return affectedRow;
     }
 
-    public List<Room> getRoomsByCinemaID(Integer cinemaId) {
+    public List<Room> getRoomsByCinema(Integer cinemaId) {
         List<Room> list = new ArrayList<>();
-        String sql = cinemaId != null
-                ? "SELECT * FROM [dbo].[CinemaRoom] WHERE [CinemaID] = ?"
-                : "SELECT * FROM [dbo].[CinemaRoom]";
+        String sql = cinemaId != null ? 
+            "SELECT * FROM [dbo].[CinemaRoom] WHERE [CinemaID] = ?" :
+            "SELECT * FROM [dbo].[CinemaRoom]";
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
             if (cinemaId != null) {
@@ -104,26 +104,6 @@ public class CinemaRoomDAO extends DBConnection {
         return n;
     }
 
-    public List<Room> getAllCinemaRooms() {
-        List<Room> room = new ArrayList<>();
-        try {
-            String sql = "SELECT [RoomID],[CinemaID], [RoomName],[RoomType],[Status] FROM [dbo].[CinemaRoom] ";
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                int RoomID = rs.getInt("RoomID");
-                int CinemaID = rs.getInt("CinemaID");
-                String RoomName = rs.getString("RoomName");
-                String RoomType = rs.getString("RoomType");
-                boolean Status = rs.getBoolean("Status");
-                room.add(new Room(RoomID, CinemaID, RoomName, RoomType, Status));
-            }
-        } catch (SQLException ex) {
-            Logger.getLogger(CinemaRoomDAO.class.getName()).log(Level.SEVERE, "Error fetching cinemas", ex);
-        }
-        return room;
-    }
-
     public List<Cinema> getAllCinemas() {
         List<Cinema> cinemas = new ArrayList<>();
         try {
@@ -142,18 +122,21 @@ public class CinemaRoomDAO extends DBConnection {
         return cinemas;
     }
 
+    public List<Room> getAllCinemaRooms() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    public List<Room> getRoomsByCinemaID(int cinemaID) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
     public static void main(String[] args) {
-//        Room room = new Room(1, "Strin", "VIP");
+        Room room = new Room(1, "Strin", "VIP");
         CinemaRoomDAO dao = new CinemaRoomDAO();
-//        int n = dao.updateRoom(room);
-//        if(n > 0){
-//            System.out.println("abc");
-//            
-//        
-//        }
-        List<Room> list = dao.getAllCinemaRooms();
-        for (Room room : list) {
-            System.out.println(room);
+        int n = dao.updateRoom(room);
+        if(n > 0){
+            System.out.println("abc");
+            
+        
         }
     }
 }

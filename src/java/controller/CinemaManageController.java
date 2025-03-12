@@ -1,6 +1,5 @@
 package controller;
 
-
 import model.CinemaDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -74,10 +73,10 @@ public class CinemaManageController extends HttpServlet {
     }
 
     private void updateCinema(HttpServletRequest request, HttpServletResponse response, CinemaDAO dao) 
-            throws IOException {
+            throws IOException, ServletException {
         try {
             int cinemaID = Integer.parseInt(request.getParameter("cinemaID"));
-                    String cinemaName = request.getParameter("cinemaName").trim();
+            String cinemaName = request.getParameter("cinemaName").trim();
             String address = request.getParameter("address").trim();
 
             if (cinemaName.isEmpty() || address.isEmpty()) {
@@ -91,11 +90,14 @@ public class CinemaManageController extends HttpServlet {
 
             if (updated > 0) {
                 request.getSession().setAttribute("successMessage", "Cinema updated successfully!");
+                request.setAttribute("cinema", cinema);
+                request.getRequestDispatcher("/admin/cinemaupdate.jsp").forward(request, response);
             } else {
                 request.getSession().setAttribute("errorMessage", "Failed to update cinema!");
+                response.sendRedirect("CinemaManageController?action=edit&cinemaID=" + cinemaID);
             }
-            response.sendRedirect("CinemaManageController?action=list");
         } catch (Exception e) {
+            e.printStackTrace();
             response.sendRedirect("error.jsp");
         }
     }

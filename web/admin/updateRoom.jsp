@@ -1,6 +1,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="entity.Room" %>
+<%@page import="entity.Account" %>
 <%
      Account user = (Account) session.getAttribute("account");
     if (user == null){

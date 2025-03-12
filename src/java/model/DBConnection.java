@@ -36,7 +36,7 @@ public class DBConnection {
     }
     public DBConnection(){
         this("jdbc:sqlserver://localhost:1433;databaseName=swp391",
-                "sa","123456");
+                "sa","sa");
     }
     
      public ResultSet getData(String sql) {

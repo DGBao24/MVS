@@ -1,126 +1,68 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-
+<%@ page import="entity.Account" %>
+<%
+    Account user = (Account) session.getAttribute("account");
+    if (user == null) {
+        response.sendRedirect("login.jsp");
+        return;
+    }
+    if (!"Admin".equals(user.getRole()) && !"Manager".equals(user.getRole())) {
+        response.sendRedirect("error.jsp");
+        return;
+    }
+%>
 
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
-
-    <title>Movie Ticket - Promotion Management</title>
-
-    <!-- Custom fonts for this template-->
-    <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
-    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
-
-    <!-- Custom styles for this template-->
-    <link href="css/sb-admin-2.min.css" rel="stylesheet">
+    <title>Create New Cinema</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
+<body>
+    <div class="container mt-5">
+        <h2>Create New Cinema</h2>
 
-<body id="page-top">
-    <!-- Page Wrapper -->
-    <div id="wrapper">
-        <!-- Include Sidebar -->
-        <jsp:include page="sidebar.jsp" />
-
-        <!-- Content Wrapper -->
-        <div id="content-wrapper" class="d-flex flex-column">
-            <!-- Main Content -->
-            <div id="content">
-                <!-- Include Topbar -->
-                <jsp:include page="topbar.jsp" />
-
-                <!-- Begin Page Content -->
-                <div class="container-fluid">
-                    <!-- Page Heading -->
-                    <h1 class="h3 mb-4 text-gray-800">Promotion Management</h1>
-
-                    <!-- Success/Error Messages -->
-                    <c:if test="${not empty sessionScope.successMessage}">
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            ${sessionScope.successMessage}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                        <% session.removeAttribute("successMessage"); %>
-                    </c:if>
-                    <c:if test="${not empty sessionScope.errorMessage}">
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            ${sessionScope.errorMessage}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                        <% session.removeAttribute("errorMessage"); %>
-                    </c:if>
-
-                    <!-- Promotion Management Content -->
-                <div class="container">
-                        <h2>Create Cinema</h2>
-
-                        <% if (request.getAttribute("error") != null) { %>
-                            <p class="message error"><%= request.getAttribute("error") %></p>
-                        <% } %>
-
-                        <% if (request.getAttribute("success") != null) { %>
-                            <p class="message success"><%= request.getAttribute("success") %></p>
-                        <% } %>
-
-                        <form action="/bc6/CinemaManageController" method="POST">
-                            <input type="hidden" name="action" value="insert">
-                            <input type="text" name="cinemaName" placeholder="Cinema Name" required>
-                            <input type="text" name="address" placeholder="Address" required>
-                            <input type="submit" value="Create">
-                        </form>
-                    </div>
-                </div>
-                <!-- /.container-fluid -->
+        <c:if test="${not empty sessionScope.errorMessage}">
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                ${sessionScope.errorMessage}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-            <!-- End of Main Content -->
+            <% session.removeAttribute("errorMessage"); %>
+        </c:if>
 
-            <!-- Include Footer -->
-            <jsp:include page="includes/footer.jsp" />
-        </div>
-        <!-- End of Content Wrapper -->
+        <c:if test="${not empty sessionScope.successMessage}">
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                ${sessionScope.successMessage}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <% session.removeAttribute("successMessage"); %>
+        </c:if>
+
+        <form action="${pageContext.request.contextPath}/CinemaManageController" method="POST">
+            <input type="hidden" name="action" value="insert">
+            
+            <div class="mb-3">
+                <label for="cinemaName" class="form-label">Cinema Name:</label>
+                <input type="text" class="form-control" id="cinemaName" name="cinemaName" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="address" class="form-label">Address:</label>
+                <input type="text" class="form-control" id="address" name="address" required>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Create Cinema</button>
+            <a href="${pageContext.request.contextPath}/CinemaManageController?action=list" class="btn btn-secondary">Cancel</a>
+        </form>
     </div>
-    <!-- End of Page Wrapper -->
 
-    <!-- Scroll to Top Button-->
-    <a class="scroll-to-top rounded" href="#page-top">
-        <i class="fas fa-angle-up"></i>
-    </a>
-
-    <!-- Bootstrap core JavaScript-->
-    <script src="vendor/jquery/jquery.min.js"></script>
-    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Core plugin JavaScript-->
-    <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
-
-    <!-- Custom scripts for all pages-->
-    <script src="js/sb-admin-2.min.js"></script>
-
-    <!-- Page level plugins -->
-    <script src="vendor/datatables/jquery.dataTables.min.js"></script>
-    <script src="vendor/datatables/dataTables.bootstrap4.min.js"></script>
-
-    <!-- Page specific script -->
-    <script>
-        $(document).ready(function() {
-            // Initialize DataTable
-            $('#promotionTable').DataTable();
-
-            // Set min date for date inputs to today
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('startDate').min = today;
-            document.getElementById('endTime').min = today;
-
-            // Validate end date is after start date
-            document.getElementById('startDate').addEventListener('change', function() {
-                document.getElementById('endTime').min = this.value;
-            });
-    </script>
+    <jsp:include page="includes/footer.jsp" />
+    
+    <!-- Bootstrap JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
