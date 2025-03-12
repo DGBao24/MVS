@@ -169,10 +169,11 @@ public class MovieDAO extends DBConnection {
         return list;
     }
     
-        public int insertMovie(Movie movie){
-            int affectedRow = 0;
-            String sql = "INSERT INTO [dbo].[Movie]([MovieName],[Duration],[Genre],[Director],[ReleaseDate],[Description],[Rate],[TrailerURL],[BasePrice],[Status])\n" +
-"     VALUES(?,?,?,?,?,?,?,?,?,?)";
+         public int insertMovie(Movie movie) {
+        int affectedRow = 0;
+        String sql = "INSERT INTO [dbo].[Movie]([MovieName],[Duration],[Genre],[Director],"
+                + "[ReleaseDate],[Description],[Rate],[MoviePoster],[TrailerURL],[BasePrice],[Status])\n"
+                + "VALUES(?,?,?,?,?,?,?,?,?,?,?)";
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, movie.getMovieName());
@@ -182,19 +183,22 @@ public class MovieDAO extends DBConnection {
             ps.setDate(5, (Date) movie.getReleaseDate());
             ps.setString(6, movie.getDescription());
             ps.setString(7, movie.getRate());
-            ps.setString(8, movie.getTrailerURL());
-            ps.setInt(9, movie.getBasePrice());
-            ps.setString(10, movie.getStatus());
+            ps.setString(8, movie.getMoviePoster());
+            ps.setString(9, movie.getTrailerURL());
+            ps.setInt(10, movie.getBasePrice());
+            ps.setString(11, movie.getStatus());
             affectedRow = ps.executeUpdate();
         } catch (SQLException ex) {
             Logger.getLogger(MovieDAO.class.getName()).log(Level.SEVERE, null, ex);
         }
         return affectedRow;
-        }
+    }
         
-        public int updateMovie(Movie movie){
-            int affectedRow = 0;
-            String sql = "UPDATE [dbo].[Movie] SET [MovieName] = ?,[Duration] = ?,[Genre] = ?,[Director] = ?,[ReleaseDate] = ?,[Description] = ?,[Rate] = ?,[TrailerURL] = ?,[BasePrice] = ?,[Status] = ? WHERE MovieID = ?";
+        public int updateMovie(Movie movie) {
+        int affectedRow = 0;
+        String sql = "UPDATE [dbo].[Movie] SET [MovieName] = ?,[Duration] = ?,[Genre] = ?,[Director] = ?,"
+                + "[ReleaseDate] = ?,[Description] = ?,[Rate] = ?,[MoviePoster] = ?,[TrailerURL] = ?,"
+                + "[BasePrice] = ?,[Status] = ? WHERE MovieID = ?";
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, movie.getMovieName());
@@ -204,16 +208,17 @@ public class MovieDAO extends DBConnection {
             ps.setDate(5, (Date) movie.getReleaseDate());
             ps.setString(6, movie.getDescription());
             ps.setString(7, movie.getRate());
-            ps.setString(8, movie.getTrailerURL());
-            ps.setInt(9, movie.getBasePrice());
-            ps.setString(10, movie.getStatus());
-            ps.setInt(11, movie.getMovieID());
+            ps.setString(8, movie.getMoviePoster());
+            ps.setString(9, movie.getTrailerURL());
+            ps.setInt(10, movie.getBasePrice());
+            ps.setString(11, movie.getStatus());
+            ps.setInt(12, movie.getMovieID());
             affectedRow = ps.executeUpdate();
         } catch (SQLException ex) {
             Logger.getLogger(MovieDAO.class.getName()).log(Level.SEVERE, null, ex);
         }
         return affectedRow;
-        }
+    }
 
     public static void main(String[] args) {
         MovieDAO dao = new MovieDAO();

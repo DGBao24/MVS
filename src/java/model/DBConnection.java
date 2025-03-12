@@ -6,7 +6,9 @@ package model;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -35,6 +37,20 @@ public class DBConnection {
     public DBConnection(){
         this("jdbc:sqlserver://localhost:1433;databaseName=swp391",
                 "sa","123456");
+    }
+    
+     public ResultSet getData(String sql) {
+        ResultSet rs = null;
+        try {
+            Statement statement = conn.createStatement(
+                ResultSet.TYPE_SCROLL_INSENSITIVE,
+                ResultSet.CONCUR_READ_ONLY
+            );
+            rs = statement.executeQuery(sql);
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return rs;
     }
     
     

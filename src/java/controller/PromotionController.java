@@ -49,7 +49,7 @@ public class PromotionController extends HttpServlet {
         try {
             // Handle public promotion list view
             if (service.equals("publicList")) {
-                String sql = "SELECT * FROM Promotion WHERE Status = 1 AND EndDate >= GETDATE() ORDER BY StartDate DESC";
+                String sql = "SELECT * FROM Promotion WHERE Status = 1 ";
                 List<Promotion> promotions = dao.getPromotion(sql);
                 request.setAttribute("promotionList", promotions);
                 request.getRequestDispatcher("/promotion.jsp").forward(request, response);

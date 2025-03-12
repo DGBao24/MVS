@@ -56,6 +56,28 @@ public class DAOImage extends DBConnection {
     
     return imagePath;
 }
+    public int saveMovieImage(String imagePath) {
+        int imageId = -1;
+        try {
+            String sql = "INSERT INTO Image (ImagePath, ImageType) VALUES (?, 'Poster')";
+            PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            ps.setString(1, imagePath);
+            int affectedRows = ps.executeUpdate();
+            
+            if (affectedRows > 0) {
+                ResultSet rs = ps.getGeneratedKeys();
+                if (rs.next()) {
+                    imageId = rs.getInt(1);
+                }
+                rs.close();
+            }
+            ps.close();
+        } catch (SQLException ex) {
+            System.out.println("Error saving image: " + ex.getMessage());
+            ex.printStackTrace();
+        }
+        return imageId;
+    }
     
     public static void main(String[] args) {
         DAOImage dao = new DAOImage();
