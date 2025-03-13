@@ -3,15 +3,22 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/Nhat%20Anh/Documents/Zalo%20Received%20Files/bc6_2%20(1)/src/java/model/DBConnection.java</file>
-            <file>file:/C:/Users/Nhat%20Anh/Documents/Zalo%20Received%20Files/bc6_2%20(1)/src/java/entity/Seat.java</file>
-            <file>file:/C:/Users/Nhat%20Anh/Documents/Zalo%20Received%20Files/bc6_2%20(1)/src/java/controller/CinemaManageController.java</file>
-            <file>file:/C:/Users/Nhat%20Anh/Documents/Zalo%20Received%20Files/bc6_2%20(1)/src/java/model/SeatDAO.java</file>
-            <file>file:/C:/Users/Nhat%20Anh/Documents/Zalo%20Received%20Files/bc6_2%20(1)/src/java/controller/RoomManageController.java</file>
-            <file>file:/C:/Users/Nhat%20Anh/Documents/Zalo%20Received%20Files/bc6_2%20(1)/src/java/controller/SeatController.java</file>
-            <file>file:/C:/Users/Nhat%20Anh/Documents/Zalo%20Received%20Files/bc6_2%20(1)/src/java/controller/CinemaRoomController.java</file>
-            <file>file:/C:/Users/Nhat%20Anh/Documents/Zalo%20Received%20Files/bc6_2%20(1)/src/java/entity/Room.java</file>
-            <file>file:/C:/Users/Nhat%20Anh/Documents/Zalo%20Received%20Files/bc6_2%20(1)/src/java/model/CinemaRoomDAO.java</file>
+            <file>file:/D:/FPTU/Spring25/SWP/MVS/src/java/controller/SeatController.java</file>
+            <file>file:/D:/FPTU/Spring25/SWP/MVS/src/java/model/CinemaDAO.java</file>
+            <file>file:/D:/FPTU/Spring25/SWP/MVS/src/java/entity/Room.java</file>
+            <file>file:/D:/FPTU/Spring25/SWP/MVS/src/java/model/DAOCombo.java</file>
+            <file>file:/D:/FPTU/Spring25/SWP/MVS/src/java/entity/Seat.java</file>
+            <file>file:/D:/FPTU/Spring25/SWP/MVS/src/java/model/DAOPromotion.java</file>
+            <file>file:/D:/FPTU/Spring25/SWP/MVS/src/java/model/DBConnection.java</file>
+            <file>file:/D:/FPTU/Spring25/SWP/MVS/src/java/entity/Ticket.java</file>
+            <file>file:/D:/FPTU/Spring25/SWP/MVS/src/java/entity/Showtime.java</file>
+            <file>file:/D:/FPTU/Spring25/SWP/MVS/src/java/controller/BookingController.java</file>
+            <file>file:/D:/FPTU/Spring25/SWP/MVS/web/ticket-confirmation.jsp</file>
+            <file>file:/D:/FPTU/Spring25/SWP/MVS/web/ticket_selection.jsp</file>
+            <file>file:/D:/FPTU/Spring25/SWP/MVS/src/java/model/DAOAccount.java</file>
+            <file>file:/D:/FPTU/Spring25/SWP/MVS/src/java/model/DAOShowtime.java</file>
+            <file>file:/D:/FPTU/Spring25/SWP/MVS/src/java/model/BookingDAO.java</file>
+            <file>file:/D:/FPTU/Spring25/SWP/MVS/src/java/model/CinemaRoomDAO.java</file>
         </group>
     </open-files>
 </project-private>

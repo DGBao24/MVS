@@ -133,7 +133,7 @@
                             </p>
                             <div class="d-flex justify-content-between align-items-center">
                                 <a href="MovieController?service=detail&id=<%= movie.getMovieID() %>" class="btn btn-primary">Details</a>
-                                <a href="ShowtimeController?movieID=<%= movie.getMovieID() %>" class="btn btn-danger">Book Now</a>
+                                <a href="book?movieID=<%= movie.getMovieID() %>" class="btn btn-danger">Book Now</a>
                             </div>
                         </div>
                     </div>
