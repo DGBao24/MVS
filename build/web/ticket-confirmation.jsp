@@ -1,4 +1,6 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page import="entity.Ticket" %>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -6,16 +8,24 @@
 </head>
 <body>
     <h2>Thông Tin Vé Đặt Thành Công</h2>
-    
-    <p><strong>Mã Ghế:</strong> ${seatID}</p>
-    <p><strong>Mã Suất Chiếu:</strong> ${showtimeID}</p>
-    <p><strong>Mã Rạp:</strong> ${cinemaID}</p>
-    <p><strong>Mã Phòng:</strong> ${roomID}</p>
-    <p><strong>Thời Gian Chiếu:</strong> ${startTime}</p>
-    <c:if test="${not empty comboID}">
-        <p><strong>Mã Combo:</strong> ${comboID}</p>
-    </c:if>
-    
+
+    <%
+        Ticket ticket = (Ticket) request.getAttribute("ticket");
+        if (ticket != null) {
+    %>
+        <p><strong>Mã Vé:</strong> <%= ticket.getTicketID() %></p>
+        <p><strong>Mã Ghế:</strong> <%= ticket.getSeatID() %></p>
+        <p><strong>Mã Suất Chiếu:</strong> <%= ticket.getShowTimeID() %></p>
+        <p><strong>Mã Combo:</strong> <%= ticket.getComboID() == 0 ? "Không chọn" : ticket.getComboID() %></p>
+        
+    <%
+        } else {
+    %>
+        <p style="color:red;">Lỗi: Không tìm thấy thông tin vé!</p>
+    <%
+        }
+    %>
+
     <p><a href="index.jsp">Quay về trang chủ</a></p>
-</body>
+</body> 
 </html>

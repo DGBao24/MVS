@@ -1,12 +1,13 @@
 package controller;
 
+import entity.Combo;
+import entity.Seat;
+import entity.Showtime;
 import entity.Ticket;
 import model.BookingDAO;
 import java.io.IOException;
-import java.sql.ResultSet;
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.util.List;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -15,9 +16,12 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @WebServlet(name = "BookingController", urlPatterns = {"/book"})
 public class BookingController extends HttpServlet {
+
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         BookingDAO dao = new BookingDAO();
+
+        // Lấy movieID từ request (được truyền từ trang khác)
         String movieID = request.getParameter("movieID");
         String cinemaID = request.getParameter("CinemaID");
         String startTime = request.getParameter("StartTime");
@@ -28,65 +32,86 @@ public class BookingController extends HttpServlet {
         try {
             if (movieID != null && !movieID.isEmpty()) {
                 int mid = Integer.parseInt(movieID);
-                
-                // Dùng ResultSet lấy danh sách rạp chiếu phim
-                ResultSet rsCinema = dao.getData("SELECT CinemaID, CinemaName FROM Cinema WHERE MovieID = " + mid);
-                request.setAttribute("cinemaList", rsCinema);
+                List<Showtime> cinemas = dao.getShowTimeByMovie(mid);
+                request.setAttribute("cinemaList", cinemas);
             }
 
             if (cinemaID != null && !cinemaID.isEmpty()) {
+                int mid = Integer.parseInt(movieID);
                 int cid = Integer.parseInt(cinemaID);
-                
-                // Dùng ResultSet lấy danh sách suất chiếu theo rạp
-                ResultSet rsShowtime = dao.getData("SELECT ShowtimeID, StartTime FROM Showtime WHERE CinemaID = " + cid);
-                request.setAttribute("showtimeList", rsShowtime);
+
+                // ✅ Sửa lỗi: Lấy danh sách suất chiếu theo đúng CinemaID
+                List<Showtime> showtimes = dao.getDateByCinema(mid, cid);
+                request.setAttribute("showtimes", showtimes);
+                request.setAttribute("selectedCinemaID", cid); // Giữ giá trị đã chọn
             }
 
             if (startTime != null && !startTime.isEmpty()) {
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-                Timestamp timestamp = Timestamp.valueOf(LocalDateTime.parse(startTime, formatter));
+                Timestamp timestamp = Timestamp.valueOf(startTime.split("\\.")[0]);
 
+                int mid = Integer.parseInt(movieID);
                 int cid = Integer.parseInt(cinemaID);
-                
-                // Dùng ResultSet lấy danh sách phòng chiếu
-                ResultSet rsRoom = dao.getData("SELECT RoomID, RoomName FROM Room WHERE CinemaID = " + cid + " AND StartTime = '" + timestamp + "'");
-                request.setAttribute("roomList", rsRoom);
+
+                // ✅ Sửa lỗi: Lấy danh sách phòng đúng theo startTime đã chọn
+                List<Showtime> rooms = dao.getRoomByDate(mid, cid, timestamp);
+                request.setAttribute("rooms", rooms);
+                request.setAttribute("selectedStartTime", startTime); // Giữ lại StartTime
             }
 
             if (roomID != null && !roomID.isEmpty()) {
                 int rid = Integer.parseInt(roomID);
-                
-                // Dùng ResultSet lấy danh sách ghế
-                ResultSet rsSeat = dao.getData("SELECT SeatID, SeatNumber FROM Seat WHERE RoomID = " + rid);
-                request.setAttribute("seatList", rsSeat);
+                List<Seat> seats = dao.getSeatByRoom(rid);
+                request.setAttribute("seats", seats);
+                request.setAttribute("selectedRoomID", rid); // Giữ lại RoomID
             }
 
-            if (seatID != null && !seatID.isEmpty()) {
-                
-                // Dùng ResultSet lấy danh sách combo đồ ăn
-                ResultSet rsCombo = dao.getData("SELECT ComboID, ComboName, Price FROM Combo");
-                request.setAttribute("comboList", rsCombo);
-            }
+            List<Combo> combos = dao.getCombo("SELECT * FROM Combo");
+            request.setAttribute("comboList", combos);
 
             // Xử lý đặt vé khi bấm submit
-            if (request.getParameter("submit") != null) {
+            if (request.getParameter("buy") != null) {
                 if (seatID == null || seatID.isEmpty()) {
                     request.setAttribute("mess", "Vui lòng chọn ghế!");
                 } else {
                     int sid = Integer.parseInt(seatID);
-                    int tid = Integer.parseInt(request.getParameter("ShowtimeID"));
 
-                    if (comboID == null || comboID.isEmpty()) {
-                        Ticket ticket = new Ticket(sid, tid);
-                        dao.insertTicketWithOutCombo(ticket);
-                    } else {
-                        int cbid = Integer.parseInt(comboID);
-                        Ticket ticket = new Ticket(sid, tid, cbid);
-                        dao.insertTicket(ticket);
+                    // ✅ Lấy ShowtimeID từ danh sách showtimes
+                    int tid = -1;
+                    List<Showtime> showtimes = (List<Showtime>) request.getAttribute("showtimes");
+                    if (showtimes != null && !showtimes.isEmpty()) {
+                        tid = showtimes.get(0).getShowtimeID();
                     }
 
-                    request.getRequestDispatcher("ticket-confirmation.jsp").forward(request, response);
-                    return;
+                    if (tid == -1) {
+                        request.setAttribute("mess", "Lỗi: Không tìm thấy suất chiếu!");
+                    } else {
+                        Ticket ticket ;
+                        if (comboID == null || comboID.isEmpty()) {
+                            ticket = new Ticket(sid, tid);
+                            int newTicketID = dao.insertTicketWithOutCombo(ticket);
+                            if (newTicketID > 0) {
+                                ticket.setTicketID(newTicketID);
+                            }
+                        } else {
+                            int cbid = Integer.parseInt(comboID);
+                            ticket = new Ticket(sid, tid, cbid);
+                            ticket.setComboID(cbid);
+                            int newTicketID = dao.insertTicket(ticket);
+                            if (newTicketID > 0) {
+                                ticket.setTicketID(newTicketID);
+                            }
+                        }
+
+// Kiểm tra xem vé có được tạo thành công không
+                        if (ticket.getTicketID() > 0) {
+                            request.setAttribute("ticket", ticket);
+                            request.getRequestDispatcher("ticket-confirmation.jsp").forward(request, response);
+                        } else {
+                            request.setAttribute("mess", "Lỗi khi đặt vé, vui lòng thử lại!");
+                            request.getRequestDispatcher("select_ticket.jsp").forward(request, response);
+                        }
+
+                    }
                 }
             }
         } catch (NumberFormatException e) {
@@ -104,7 +129,7 @@ public class BookingController extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
+            throws ServletException, IOException {
         processRequest(request, response);
     }
 }

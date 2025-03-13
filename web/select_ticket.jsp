@@ -1,123 +1,107 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="java.sql.ResultSet" %>
+<%@ page import="java.util.List" %>
+<%@ page import="entity.Showtime, entity.Seat, entity.Combo" %>
 <html>
-<head>
-    <title>Chọn Vé</title>
-    <script>
-        function autoSubmit(form) {
-            form.submit();
-        }
-    </script>
-</head>
-<body>
-    <h2>Chọn vé xem phim</h2>
-    
-    <form action="book" method="post">
-        <%-- Lấy movieID từ request (ẩn để giữ giá trị) --%>
-        <input type="hidden" name="movieID" value="<%= request.getParameter("movieID") %>">
-        
-        <%-- Chọn Cinema --%>
-        <label>Chọn Rạp:</label>
-        <select name="CinemaID" onchange="autoSubmit(this.form)">
-            <option value="">-- Chọn --</option>
-            <%
-                ResultSet rsCinema = (ResultSet) request.getAttribute("cinemaList");
-                if (rsCinema != null) {
-                    while (rsCinema.next()) {
-            %>
-                <option value="<%= rsCinema.getInt("CinemaID") %>">
-                    <%= rsCinema.getString("CinemaName") %>
-                </option>
-            <%
-                    }
-                    rsCinema.close();
-                }
-            %>
-        </select>
+    <head>
+        <title>Chọn Vé</title>
+        <script>
+            function autoSubmit() {
+                document.getElementById('bookingForm').submit();
+            }
+        </script>
+    </head>
+    <body>
+        <h2>Chọn vé xem phim</h2>
 
-        <%-- Chọn Suất Chiếu --%>
-        <label>Chọn Giờ:</label>
-        <select name="StartTime" onchange="autoSubmit(this.form)">
-            <option value="">-- Chọn --</option>
-            <%
-                ResultSet rsShowtime = (ResultSet) request.getAttribute("showtimeList");
-                if (rsShowtime != null) {
-                    while (rsShowtime.next()) {
-            %>
-                <option value="<%= rsShowtime.getTimestamp("StartTime") %>">
-                    <%= rsShowtime.getTimestamp("StartTime") %>
-                </option>
-            <%
-                    }
-                    rsShowtime.close();
-                }
-            %>
-        </select>
+        <form id="bookingForm" action="book" method="post">
+            <input type="hidden" name="movieID" value="<%= request.getParameter("movieID") != null ? request.getParameter("movieID") : "" %>">
 
-        <%-- Chọn Phòng --%>
-        <label>Chọn Phòng:</label>
-        <select name="RoomID" onchange="autoSubmit(this.form)">
-            <option value="">-- Chọn --</option>
-            <%
-                ResultSet rsRoom = (ResultSet) request.getAttribute("roomList");
-                if (rsRoom != null) {
-                    while (rsRoom.next()) {
-            %>
-                <option value="<%= rsRoom.getInt("RoomID") %>">
-                    <%= rsRoom.getString("RoomName") %>
-                </option>
-            <%
-                    }
-                    rsRoom.close();
-                }
-            %>
-        </select>
+            <!-- Chọn Rạp -->
+            <label>Chọn Rạp:</label>
+            <select name="CinemaID" onchange="autoSubmit()">
+                <option value="">-- Chọn --</option>
+                <% 
+                    List<Showtime> cinemas = (List<Showtime>) request.getAttribute("cinemaList");
+                    String cinemaIDParam = request.getParameter("CinemaID");
+                    if (cinemas != null) {
+                        for (Showtime c : cinemas) { 
+                            String selected = (cinemaIDParam != null && cinemaIDParam.equals(String.valueOf(c.getCinemaID()))) ? "selected" : ""; 
+                %>
+                            <option value="<%= c.getCinemaID() %>" <%= selected %>><%= c.getCinemaID() %></option>
+                <%      }
+                    } %>
+            </select>
 
-        <%-- Chọn Ghế --%>
-        <label>Chọn Ghế:</label>
-        <select name="SeatID" onchange="autoSubmit(this.form)">
-            <option value="">-- Chọn --</option>
-            <%
-                ResultSet rsSeat = (ResultSet) request.getAttribute("seatList");
-                if (rsSeat != null) {
-                    while (rsSeat.next()) {
-            %>
-                <option value="<%= rsSeat.getInt("SeatID") %>">
-                    <%= rsSeat.getString("SeatNumber") %>
-                </option>
-            <%
-                    }
-                    rsSeat.close();
-                }
-            %>
-        </select>
+            <!-- Chọn Giờ Chiếu -->
+            <label>Chọn Giờ:</label>
+            <select name="StartTime" onchange="autoSubmit()">
+                <option value="">-- Chọn --</option>
+                <% 
+                    List<Showtime> showtimes = (List<Showtime>) request.getAttribute("showtimes");
+                    String startTimeParam = request.getParameter("StartTime");
+                    if (showtimes != null) {
+                        for (Showtime s : showtimes) { 
+                            String selected = (startTimeParam != null && startTimeParam.equals(String.valueOf(s.getStartTime()))) ? "selected" : ""; 
+                %>
+                            <option value="<%= s.getStartTime() %>" <%= selected %>><%= s.getStartTime() %></option>
+                <%      }
+                    } %>
+            </select>
 
-        <%-- Chọn Combo (nếu có) --%>
-        <label>Chọn Combo:</label>
-        <select name="ComboID">
-            <option value="">Không chọn</option>
-            <%
-                ResultSet rsCombo = (ResultSet) request.getAttribute("comboList");
-                if (rsCombo != null) {
-                    while (rsCombo.next()) {
-            %>
-                <option value="<%= rsCombo.getInt("ComboID") %>">
-                    <%= rsCombo.getString("ComboName") %> - <%= rsCombo.getDouble("Price") %> VND
-                </option>
-            <%
-                    }
-                    rsCombo.close();
-                }
-            %>
-        </select>
+            <!-- Chọn Phòng -->
+            <label>Chọn Phòng:</label>
+            <select name="RoomID" onchange="autoSubmit()">
+                <option value="">-- Chọn --</option>
+                <% 
+                    List<Showtime> rooms = (List<Showtime>) request.getAttribute("rooms");
+                    String roomIDParam = request.getParameter("RoomID");
+                    if (rooms != null) {
+                        for (Showtime r : rooms) { 
+                            String selected = (roomIDParam != null && roomIDParam.equals(String.valueOf(r.getRoomID()))) ? "selected" : ""; 
+                %>
+                            <option value="<%= r.getRoomID() %>" <%= selected %>><%= r.getRoomID() %></option>
+                <%      }
+                    } %>
+            </select>
 
-        <br><br>
-        <input type="submit" name="submit" value="Xác nhận đặt vé">
-    </form>
+            <!-- Chọn Ghế -->
+            <label>Chọn Ghế:</label>
+            <select name="SeatID" onchange="autoSubmit()">
+                <option value="">-- Chọn --</option>
+                <% 
+                    List<Seat> seats = (List<Seat>) request.getAttribute("seats");
+                    String seatIDParam = request.getParameter("SeatID");
+                    if (seats != null) {
+                        for (Seat seat : seats) { 
+                            String selected = (seatIDParam != null && seatIDParam.equals(String.valueOf(seat.getSeatID()))) ? "selected" : ""; 
+                %>
+                            <option value="<%= seat.getSeatID() %>" <%= selected %>><%= seat.getSeatNumber() %></option>
+                <%      }
+                    } %>
+            </select>
 
-    <%-- Hiển thị thông báo lỗi nếu có --%>
-    <% if (request.getAttribute("mess") != null) { %>
-        <p style="color:red;"><%= request.getAttribute("mess") %></p>
-    <% } %>
-</body> 
-</html>
+            <!-- Chọn Combo -->
+            <label>Chọn Combo:</label>
+            <select name="ComboID">
+                <option value="">Không chọn</option>
+                <% 
+                    List<Combo> combos = (List<Combo>) request.getAttribute("comboList");
+                    if (combos != null) {
+                        for (Combo c : combos) { 
+                            String selected = (request.getParameter("ComboID") != null && request.getParameter("ComboID").equals(String.valueOf(c.getComboID()))) ? "selected" : ""; 
+                %>
+                            <option value="<%= c.getComboID() %>" <%= selected %>><%= c.getComboID() %> - <%= c.getPrice() %> VND</option>
+                <%      }
+                    } %>
+            </select>
+
+            <br><br>
+            <input type="submit" name="buy" value="Xác nhận đặt vé">
+        </form>
+
+        <!-- Hiển thị thông báo lỗi -->
+        <% if (request.getAttribute("mess") != null) { %>
+            <p style="color:red;"><%= request.getAttribute("mess") %></p>
+        <% } %>
+    </body>  
+</html>  

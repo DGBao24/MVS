@@ -42,7 +42,9 @@ public class BookingDAO extends DBConnection {
                 show.setRoomID(rs.getInt("RoomID"));
                 show.setStartTime(rs.getTimestamp("StartTime"));
                 show.setEndTime(rs.getTimestamp("EndTime"));
+                listS.add(show);
             }
+
         } catch (SQLException ex) {
             Logger.getLogger(BookingDAO.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -52,7 +54,7 @@ public class BookingDAO extends DBConnection {
 
     public List<Showtime> getDateByCinema(int mid, int cid) {
         List<Showtime> listS = new ArrayList<>();
-        String sql = "Select StartTime from Showtime where MovieID =? And CinemaID=?";
+        String sql = "Select * from Showtime where MovieID =? And CinemaID=?";
         PreparedStatement stm;
         try {
             stm = conn.prepareStatement(sql);
@@ -62,8 +64,14 @@ public class BookingDAO extends DBConnection {
             while (rs.next()) {
                 Showtime show = new Showtime();
 
+                show.setShowtimeID(rs.getInt("ShowTimeID"));
+                show.setMovieID(rs.getInt("MovieID"));
+                show.setCinemaID(rs.getInt("CinemaID"));
+                show.setRoomID(rs.getInt("RoomID"));
                 show.setStartTime(rs.getTimestamp("StartTime"));
-
+                show.setEndTime(rs.getTimestamp("EndTime"));
+                listS.add(show);
+                listS.add(show);
             }
         } catch (SQLException ex) {
             Logger.getLogger(BookingDAO.class.getName()).log(Level.SEVERE, null, ex);
@@ -86,9 +94,9 @@ public class BookingDAO extends DBConnection {
             ResultSet rs = stm.executeQuery();
             while (rs.next()) {
                 Showtime show = new Showtime();
-                
+
                 show.setRoomID(rs.getInt("RoomID"));
-                
+                listS.add(show);
             }
         } catch (SQLException ex) {
             Logger.getLogger(BookingDAO.class.getName()).log(Level.SEVERE, null, ex);
@@ -96,14 +104,15 @@ public class BookingDAO extends DBConnection {
         return listS;
 
     }
+
     public List<Seat> getSeatByRoom(int rid) {
         List<Seat> listS = new ArrayList<>();
-        String sql = "Select * from Seat where RoomID =? And Status like 'Avialable'";
+        String sql = "Select * from Seat where RoomID =? And Status like 'Available'";
         PreparedStatement stm;
         try {
             stm = conn.prepareStatement(sql);
             stm.setInt(1, rid);
-           
+
             ResultSet rs = stm.executeQuery();
             while (rs.next()) {
                 Seat seat = new Seat();
@@ -113,7 +122,7 @@ public class BookingDAO extends DBConnection {
                 seat.setSeatType(rs.getString("SeatType"));
                 seat.setRoomID(rs.getInt("RoomID"));
                 seat.setStatus(rs.getString("Status"));
-
+                listS.add(seat);
             }
         } catch (SQLException ex) {
             Logger.getLogger(BookingDAO.class.getName()).log(Level.SEVERE, null, ex);
@@ -121,11 +130,11 @@ public class BookingDAO extends DBConnection {
         return listS;
 
     }
-    
+
     public List<Combo> getCombo(String sql) {
         List<Combo> list = new ArrayList<>();
         try {
-           Statement statement = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+            Statement statement = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
             ResultSet rs = statement.executeQuery(sql);
             while (rs.next()) {
                 int ComboID = rs.getInt(1);
@@ -142,14 +151,14 @@ public class BookingDAO extends DBConnection {
         }
         return list;
     }
-    
-    public Combo getComboByID(String cit){
+
+    public Combo getComboByID(String cit) {
         String sql = "SELECT * FROM [swp391].[dbo].[Combo] where ComboItem = ?";
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, cit);
             ResultSet rs = ps.executeQuery();
-            if (rs.next()){
+            if (rs.next()) {
                 int row = 1;
                 Combo combo = new Combo(rs.getInt(row++), rs.getString(row++), rs.getString(row++), rs.getFloat(row++), rs.getInt(row++), rs.getBoolean(row++));
                 return combo;
@@ -159,46 +168,60 @@ public class BookingDAO extends DBConnection {
         }
         return null;
     }
-    
-    
+
     public int insertTicket(Ticket ticket) {
-        int affectedRow = 0;
-        String sql = "INSERT INTO [dbo].[Ticket] ([SeatID] ,[ShowTimeID] ,[ComboID]\n" +
-"      ) VALUES (? , ?, ?)";
-        try {
-            PreparedStatement ps = conn.prepareStatement(sql);
+        int ticketID = -1;
+        String sql = "INSERT INTO Ticket (SeatID, ShowtimeID, ComboID, Status) VALUES (?, ?, ?, 0)";
+
+        try ( PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
             ps.setInt(1, ticket.getSeatID());
             ps.setInt(2, ticket.getShowTimeID());
             ps.setInt(3, ticket.getComboID());
-            affectedRow = ps.executeUpdate();
+            int affectedRows = ps.executeUpdate();
 
-        } catch (SQLException ex) {
-            Logger.getLogger(DAOPromotion.class.getName()).log(Level.SEVERE, null, ex);
+            // Lấy ID của vé vừa được thêm vào
+            if (affectedRows > 0) {
+                ResultSet rs = ps.getGeneratedKeys();
+                if (rs.next()) {
+                    ticketID = rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-        return affectedRow;
+        return ticketID;
     }
-    
+
     public int insertTicketWithOutCombo(Ticket ticket) {
-        int affectedRow = 0;
-        String sql = "INSERT INTO [dbo].[Ticket] ([SeatID] ,[ShowTimeID] \n" +
-"      ) VALUES (? , ? )";
-        try {
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setInt(1, ticket.getSeatID());
-            ps.setInt(2, ticket.getShowTimeID());
-            
-            affectedRow = ps.executeUpdate();
+    int ticketID = -1;
+    String sql = "INSERT INTO Ticket (SeatID, ShowtimeID, Status) VALUES (?, ?, 0)";
 
-        } catch (SQLException ex) {
-            Logger.getLogger(DAOPromotion.class.getName()).log(Level.SEVERE, null, ex);
+    try (
+         PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        
+        ps.setInt(1, ticket.getSeatID());
+        ps.setInt(2, ticket.getShowTimeID());
+        int affectedRows = ps.executeUpdate();
+
+        // Lấy ID của vé vừa được thêm vào
+        if (affectedRows > 0) {
+            ResultSet rs = ps.getGeneratedKeys();
+            if (rs.next()) {
+                ticketID = rs.getInt(1);
+            }
         }
-        return affectedRow;
+    } catch (SQLException e) {
+        e.printStackTrace();
     }
-    
+    return ticketID;
+}
+
+
     public static void main(String[] args) {
         BookingDAO dao = new BookingDAO();
-        List<Showtime> list = dao.getShowTimeByMovie(1);
-        for(Showtime time : list){
+        List<Seat> list = dao.getSeatByRoom(1);
+        for (Seat time : list) {
             System.out.println(time);
         }
     }
