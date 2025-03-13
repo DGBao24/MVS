@@ -5,6 +5,7 @@
 package model;
 
 import entity.Combo;
+import entity.Movie;
 import entity.Seat;
 import entity.Showtime;
 import entity.Ticket;
@@ -50,6 +51,63 @@ public class BookingDAO extends DBConnection {
         }
         return listS;
 
+    }
+    
+    public Showtime getShowTimeByID(int stid) {
+        
+        String sql = "Select * from Showtime where ShowtimeID =?";
+        PreparedStatement stm;
+        try {
+            stm = conn.prepareStatement(sql);
+            stm.setInt(1, stid);
+            ResultSet rs = stm.executeQuery();
+            while (rs.next()) {
+                    Showtime show = new Showtime(
+               rs.getInt("ShowTimeID"),
+                rs.getInt("MovieID"),
+               rs.getInt("CinemaID"),
+                rs.getInt("RoomID"),
+                rs.getTimestamp("StartTime"),
+                rs.getTimestamp("EndTime")
+                );
+                return show;    
+            }
+
+        } catch (SQLException ex) {
+            Logger.getLogger(BookingDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+
+    }
+    
+    public Movie getMovieById(int id) {
+        Movie movie = null;
+        try {
+             String sql = "SELECT m.MovieID,m.MovieName,m.Duration,m.Genre,m.Director,m.ReleaseDate\n" +
+"      ,m.Description,m.Rate,i.ImagePath,m.TrailerURL,m.BasePrice,m.Status\n" +
+"  FROM [dbo].[Movie] m join Image i on m.MoviePoster = i.ImageID WHERE MovieID = ?";
+            PreparedStatement stm = conn.prepareStatement(sql);
+            stm.setInt(1, id);
+            ResultSet rs = stm.executeQuery();
+            if (rs.next()) {
+                movie = new Movie(
+                        rs.getInt(1),
+                        rs.getString(2),
+                        rs.getInt(3),
+                        rs.getString(4),
+                        rs.getString(5),
+                        rs.getDate(6),
+                        rs.getString(7),
+                        rs.getString(8),
+                        rs.getString(9),
+                        rs.getString(10),
+                        rs.getInt(11),
+                        rs.getString(12));
+            }
+        } catch (Exception ex) {
+            Logger.getLogger(model.MovieDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return movie;
     }
 
     public List<Showtime> getDateByCinema(int mid, int cid) {

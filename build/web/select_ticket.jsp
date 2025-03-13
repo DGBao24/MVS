@@ -1,6 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="java.util.List" %>
-<%@ page import="entity.Showtime, entity.Seat, entity.Combo" %>
+<%@ page import="java.util.List,java.sql.ResultSet" %>
+<%@ page import="entity.Showtime, entity.Seat, entity.Combo,entity.Movie" %>
 <html>
     <head>
         <title>Chọn Vé</title>
@@ -11,7 +11,14 @@
         </script>
     </head>
     <body>
-        <h2>Chọn vé xem phim</h2>
+        <%
+        ResultSet rsCom = (ResultSet) request.getAttribute("com");
+        ResultSet rsCin = (ResultSet) request.getAttribute("cin");
+        ResultSet rsRoo = (ResultSet) request.getAttribute("roo");
+        ResultSet rsSea = (ResultSet) request.getAttribute("sea");
+        Movie movie = (Movie) request.getAttribute("movie");
+        %>
+        <h2><%=movie.getMovieName()%></h2>
 
         <form id="bookingForm" action="book" method="post">
             <input type="hidden" name="movieID" value="<%= request.getParameter("movieID") != null ? request.getParameter("movieID") : "" %>">
@@ -26,10 +33,12 @@
                     if (cinemas != null) {
                         for (Showtime c : cinemas) { 
                             String selected = (cinemaIDParam != null && cinemaIDParam.equals(String.valueOf(c.getCinemaID()))) ? "selected" : ""; 
+                while(rsCin.next()){
                 %>
-                            <option value="<%= c.getCinemaID() %>" <%= selected %>><%= c.getCinemaID() %></option>
+                <option value="<%= rsCin.getInt(1) %>" <%= selected %>><%= rsCin.getString(2) %></option>
                 <%      }
-                    } %>
+}                    
+} %>
             </select>
 
             <!-- Chọn Giờ Chiếu -->
@@ -43,7 +52,7 @@
                         for (Showtime s : showtimes) { 
                             String selected = (startTimeParam != null && startTimeParam.equals(String.valueOf(s.getStartTime()))) ? "selected" : ""; 
                 %>
-                            <option value="<%= s.getStartTime() %>" <%= selected %>><%= s.getStartTime() %></option>
+                <option value="<%= s.getStartTime() %>" <%= selected %>><%= s.getStartTime() %></option>
                 <%      }
                     } %>
             </select>
@@ -58,9 +67,11 @@
                     if (rooms != null) {
                         for (Showtime r : rooms) { 
                             String selected = (roomIDParam != null && roomIDParam.equals(String.valueOf(r.getRoomID()))) ? "selected" : ""; 
+                            while(rsRoo.next()){
                 %>
-                            <option value="<%= r.getRoomID() %>" <%= selected %>><%= r.getRoomID() %></option>
+                <option value="<%= rsRoo.getInt(1) %>" <%= selected %>><%= rsRoo.getString(2) %>--<%= rsRoo.getString(3)%></option>
                 <%      }
+                        }
                     } %>
             </select>
 
@@ -74,9 +85,11 @@
                     if (seats != null) {
                         for (Seat seat : seats) { 
                             String selected = (seatIDParam != null && seatIDParam.equals(String.valueOf(seat.getSeatID()))) ? "selected" : ""; 
+                            while(rsSea.next()){
                 %>
-                            <option value="<%= seat.getSeatID() %>" <%= selected %>><%= seat.getSeatNumber() %></option>
+                <option value="<%= rsSea.getInt(1) %>" <%= selected %>><%=rsSea.getString(3)%><%=rsSea.getInt(4)%>|<%= rsSea.getString(2)%></option>
                 <%      }
+                        }
                     } %>
             </select>
 
@@ -89,9 +102,11 @@
                     if (combos != null) {
                         for (Combo c : combos) { 
                             String selected = (request.getParameter("ComboID") != null && request.getParameter("ComboID").equals(String.valueOf(c.getComboID()))) ? "selected" : ""; 
+                            while(rsCom.next()){
                 %>
-                            <option value="<%= c.getComboID() %>" <%= selected %>><%= c.getComboID() %> - <%= c.getPrice() %> VND</option>
+                <option value="<%= rsCom.getInt(1) %>" <%= selected %>><%= rsCom.getString(2) %> - <%= rsCom.getFloat(3) %> VND</option>
                 <%      }
+                    }   
                     } %>
             </select>
 
@@ -101,7 +116,7 @@
 
         <!-- Hiển thị thông báo lỗi -->
         <% if (request.getAttribute("mess") != null) { %>
-            <p style="color:red;"><%= request.getAttribute("mess") %></p>
+        <p style="color:red;"><%= request.getAttribute("mess") %></p>
         <% } %>
     </body>  
 </html>  

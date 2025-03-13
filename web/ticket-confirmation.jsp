@@ -1,5 +1,5 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@page import="entity.Ticket" %>
+<%@page import="entity.Ticket,entity.Showtime,entity.Movie" %>
 
 <!DOCTYPE html>
 <html>
@@ -11,6 +11,9 @@
 
     <%
         Ticket ticket = (Ticket) request.getAttribute("ticket");
+        Showtime show = (Showtime) request.getAttribute("showtime");
+        Movie movie = (Movie) request.getAttribute("movie");
+        
         if (ticket != null) {
     %>
         <p><strong>Mã Vé:</strong> <%= ticket.getTicketID() %></p>
