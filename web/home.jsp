@@ -38,7 +38,7 @@
                         </ul>
                         <div class="navbar-nav">
                             <% if (isLoggedIn) { %>
-                            <%    Image avatar = account.getAvatar();%>
+                         <%    Image avatar = account.getAvatar();%>
                             <div class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
                                     Welcome, <%= account.getName() %>!<img class="avatar" src="<%= avatar.getImagePath()%>" alt="Avatar" class="avatar">

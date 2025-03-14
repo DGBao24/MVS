@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import model.DAOImage;
+import utils.BCrypt;
 
 /**
  *
@@ -234,6 +235,8 @@ public class CustomerAccountController extends HttpServlet {
                 String address = request.getParameter("address");
                 String yearOfBirth = request.getParameter("yearOfBirth");
                 String gender = request.getParameter("Gender");
+                 String salt = BCrypt.gensalt();
+                String hashPassword = BCrypt.hashpw(password, salt);
                 try {
                     int YOB = Integer.parseInt(yearOfBirth);
 
@@ -276,7 +279,7 @@ public class CustomerAccountController extends HttpServlet {
                     }
 
                     // Create new account
-                    int result = dao.createAccount(new Account(name, email, password, phone, address, YOB, true, "Manager", gender));
+                    int result = dao.createAccount(new Account(name, email, hashPassword, phone, address, YOB, true, "Manager", gender));
 
                     if (result > 0) {
                         // Success - redirect to home

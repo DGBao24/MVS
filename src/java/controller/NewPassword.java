@@ -14,6 +14,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import model.DAOAccount;
 import java.sql.PreparedStatement;
+import utils.BCrypt;
 import utils.Validation;
 
 /**
@@ -38,6 +39,7 @@ public class NewPassword extends HttpServlet {
         HttpSession session = request.getSession();
         String newPassword = request.getParameter("password");
         String rePassword = request.getParameter("repassword");
+        String salt = BCrypt.gensalt();
         
         if (!newPassword.equals(rePassword)) {
             request.setAttribute("mess", "Your password does not match.");
@@ -50,11 +52,11 @@ public class NewPassword extends HttpServlet {
                 request.getRequestDispatcher("newPassword.jsp").forward(request, response);
                 return;
             }
-        
+        String hashedPassword = BCrypt.hashpw(rePassword, salt);
         try {
             String mail = (String) session.getAttribute("email");
             DAOAccount dao = new DAOAccount();
-            int result = dao.resetPasswordByEmail(mail, newPassword);
+            int result = dao.resetPasswordByEmail(mail, hashedPassword);
             if (result > 0) {
                 request.setAttribute("mess", "Reset successfully!");
                 request.getRequestDispatcher("login.jsp").forward(request, response);
@@ -109,3 +111,6 @@ public class NewPassword extends HttpServlet {
     }// </editor-fold>
 
 }
+
+
+ 

@@ -66,6 +66,24 @@ public class DAOAccount extends DBConnection {
         }
         return customer;
     }
+    
+        public String getPasswordByEmail(String email) {
+        String password = null;
+        String sql = "SELECT Password FROM Account WHERE Email = ?";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, email);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    password = rs.getString("Password");
+                }
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(DAOAccount.class.getName()).log(Level.SEVERE, "Lỗi khi lấy mật khẩu: " + ex.getMessage(), ex);
+        }
+
+        return password;
+    }
 
     public boolean isPhoneExist(String phone) {
         try {

@@ -13,6 +13,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import model.DAOAccount;
+import utils.BCrypt;
 import utils.Validation;
 
 /**
@@ -43,6 +44,10 @@ public class SignUpController extends HttpServlet {
         String address = request.getParameter("address");
         String yearOfBirth = request.getParameter("yearOfBirth");
         String gender = request.getParameter("Gender");
+        
+        //Hash password
+        String salt = BCrypt.gensalt();
+        String hashPassword = BCrypt.hashpw(password, salt);
         try {
             int YOB = Integer.parseInt(yearOfBirth);
 
@@ -85,11 +90,11 @@ public class SignUpController extends HttpServlet {
             }
 
             // Create new account
-            int result = dao.createAccount(new Account(name, email, password, phone, address, YOB, true, "Customer",gender));
+            int result = dao.createAccount(new Account(name, email, hashPassword, phone, address, YOB, true, "Customer",gender));
             
             if (result > 0) {
                 // Success - redirect to home
-                response.sendRedirect("home");
+                request.getRequestDispatcher("login.jsp").forward(request, response);
             } else {
                 // Failed to create account
                 request.setAttribute("mess", "Failed to create account. Please try again.");
