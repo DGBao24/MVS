@@ -15,6 +15,9 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @WebServlet(name = "BookingController", urlPatterns = {"/book"})
 public class BookingController extends HttpServlet {
@@ -124,8 +127,75 @@ public class BookingController extends HttpServlet {
                             }
                         }
                         if (success) {
-                            request.setAttribute("mess", "Đặt vé thành công!");
-                            request.getRequestDispatcher("ticket-confirmation.jsp").forward(request, response);
+                            // Lấy danh sách TicketID vừa tạo từ BookingDAO
+                            List<Integer> ticketIDs = dao.getLastInsertedTickets(seatIDs.length);
+
+                            // Lấy thông tin chi tiết về vé với câu truy vấn đơn giản hơn
+                            String ticketQuery = "SELECT "
+                                    + "t.*, "
+                                    + "s.SeatRow, s.SeatNumber, s.SeatType, "
+                                    + "st.StartTime, st.EndTime, "
+                                    + "c.CinemaName, cr.RoomName, cr.RoomType, "
+                                    + "m.MovieName, m.Duration, m.BasePrice, "
+                                    + "cb.ComboItem, cb.Price AS ComboPrice, "
+                                    + "pf_seat.Multiplier AS SeatFactor, "
+                                    + "pf_room.Multiplier AS RoomFactor "
+                                    + "FROM Ticket t "
+                                    + "JOIN Seat s ON t.SeatID = s.SeatID "
+                                    + "JOIN ShowTime st ON t.ShowTimeID = st.ShowTimeID "
+                                    + "JOIN Cinema c ON st.CinemaID = c.CinemaID "
+                                    + "JOIN CinemaRoom cr ON st.RoomID = cr.RoomID "
+                                    + "JOIN Movie m ON st.MovieID = m.MovieID "
+                                    + "LEFT JOIN Combo cb ON t.ComboID = cb.ComboID "
+                                    + "JOIN PricingFactor pf_seat "
+                                    + "ON pf_seat.Type = 'Seat' AND pf_seat.Category = s.SeatType "
+                                    + "JOIN PricingFactor pf_room "
+                                    + "ON pf_room.Type = 'Room' AND pf_room.Category = cr.RoomType "
+                                    + "WHERE t.TicketID IN ("
+                                    + String.join(",", ticketIDs.stream()
+                                            .map(String::valueOf)
+                                            .toArray(String[]::new)) + ")";
+
+                            ResultSet ticketRs = dao.getData(ticketQuery);
+
+                            if (ticketRs == null) {
+                                request.setAttribute("mess", "Lỗi: Không thể truy vấn thông tin vé!");
+                                request.getRequestDispatcher("select_ticket.jsp").forward(request, response);
+                                return;
+                            }
+
+                            try {
+                                if (!ticketRs.isBeforeFirst()) {
+                                    request.setAttribute("mess", "Lỗi: Không tìm thấy thông tin vé!");
+                                    request.getRequestDispatcher("select_ticket.jsp").forward(request, response);
+                                    return;
+                                }
+
+                                double totalPrice = 0;
+                                double basePrice = 0;
+
+                                while (ticketRs.next()) {
+                                    basePrice = ticketRs.getDouble("BasePrice");
+                                    double seatFactor = ticketRs.getDouble("SeatFactor");
+                                    double roomFactor = ticketRs.getDouble("RoomFactor");
+                                    double comboPrice = ticketRs.getDouble("ComboPrice");
+
+                                    totalPrice += (basePrice * seatFactor * roomFactor) + (comboPrice > 0 ? comboPrice : 0);
+                                }
+
+                                ticketRs.beforeFirst();
+                                request.setAttribute("ticketDetails", ticketRs);
+                                request.setAttribute("totalPrice", totalPrice);
+                                request.setAttribute("basePrice", basePrice);
+                                request.setAttribute("mess", "Đặt vé thành công!");
+                                request.getRequestDispatcher("ticket-confirmation.jsp").forward(request, response);
+                                return;
+                            } catch (SQLException ex) {
+                                Logger.getLogger(BookingController.class.getName()).log(Level.SEVERE, null, ex);
+                                request.setAttribute("mess", "Lỗi khi xử lý thông tin vé: " + ex.getMessage());
+                                request.getRequestDispatcher("select_ticket.jsp").forward(request, response);
+                                return;
+                            }
                         } else {
                             request.setAttribute("mess", "Lỗi khi đặt một số vé, vui lòng kiểm tra lại!");
                             request.getRequestDispatcher("select_ticket.jsp").forward(request, response);

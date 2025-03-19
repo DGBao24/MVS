@@ -104,7 +104,7 @@
 
                                             <div class="mb-3">
                                                 <label for="movieID" class="form-label">Movie Name:</label>
-                                                <select class="form-select form-control" name="movieID" id="movieID" required>
+                                                <select class="form-select form-control" name="MovieID" id="movieID" required>
                                                     <% if(rsMov != null) { rsMov.beforeFirst(); while(rsMov.next()){ %>
                                                     <option value="<%= rsMov.getInt(1) %>" <%= (movieID != null && movieID.equals(String.valueOf(rsMov.getInt(1)))) ? "selected" : "" %>>
                                                         <%= rsMov.getString(2) %>

@@ -275,9 +275,9 @@ public class BookingDAO extends DBConnection {
         }
         return ticketID;
     }
-    
+
     public Seat getSeatByID(int sid) {
-        
+
         String sql = "Select * from Seat where SeatID =? ";
         PreparedStatement stm;
         try {
@@ -287,12 +287,12 @@ public class BookingDAO extends DBConnection {
             ResultSet rs = stm.executeQuery();
             while (rs.next()) {
                 Seat seat = new Seat(
-                rs.getInt("SeatID"),
-               rs.getString("SeatRow"),
-                rs.getInt("SeatNumber"),
-              rs.getString("SeatType"),
-                rs.getInt("RoomID"),
-               rs.getString("Status")
+                        rs.getInt("SeatID"),
+                        rs.getString("SeatRow"),
+                        rs.getInt("SeatNumber"),
+                        rs.getString("SeatType"),
+                        rs.getInt("RoomID"),
+                        rs.getString("Status")
                 );
                 return seat;
             }
@@ -302,7 +302,7 @@ public class BookingDAO extends DBConnection {
         return null;
 
     }
-    
+
     public List<Room> getRoomByCinema(int mid) {
         List<Room> listS = new ArrayList<>();
         String sql = "Select * from Room where CinemaID = ?";
@@ -327,15 +327,13 @@ public class BookingDAO extends DBConnection {
         return listS;
 
     }
-    
+
     public int updateSeatBooking(int sid) {
         Seat seat = getSeatByID(sid);
         int affectedRow = 0;
         String sql = "UPDATE [dbo].[Seat] SET [Status] = 'Processing' WHERE SeatID = ?";
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
-
-            
 
             ps.setInt(1, seat.getSeatID());
             affectedRow = ps.executeUpdate();
@@ -352,14 +350,14 @@ public class BookingDAO extends DBConnection {
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
 
-             ps.setInt(1, seat.getSeatID());
+            ps.setInt(1, seat.getSeatID());
             affectedRow = ps.executeUpdate();
         } catch (SQLException ex) {
             Logger.getLogger(CinemaRoomDAO.class.getName()).log(Level.SEVERE, null, ex);
         }
         return affectedRow;
     }
-    
+
     public int updateSeatEndTime(int sid) {
         Seat seat = getSeatByID(sid);
         int affectedRow = 0;
@@ -367,7 +365,7 @@ public class BookingDAO extends DBConnection {
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
 
-             ps.setInt(1, seat.getSeatID());
+            ps.setInt(1, seat.getSeatID());
             affectedRow = ps.executeUpdate();
         } catch (SQLException ex) {
             Logger.getLogger(CinemaRoomDAO.class.getName()).log(Level.SEVERE, null, ex);
@@ -375,7 +373,21 @@ public class BookingDAO extends DBConnection {
         return affectedRow;
     }
 
-    
+    public List<Integer> getLastInsertedTickets(int count) {
+        List<Integer> ticketIDs = new ArrayList<>();
+        String sql = "SELECT TOP " + count + " TicketID FROM Ticket ORDER BY TicketID DESC";
+
+        try {
+            ResultSet rs = getData(sql);
+            while (rs.next()) {
+                ticketIDs.add(rs.getInt("TicketID"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return ticketIDs;
+    }
 
     public static void main(String[] args) {
         BookingDAO dao = new BookingDAO();
