@@ -6,6 +6,7 @@ package model;
 
 import entity.Combo;
 import entity.Movie;
+import entity.Room;
 import entity.Seat;
 import entity.Showtime;
 import entity.Ticket;
@@ -52,9 +53,9 @@ public class BookingDAO extends DBConnection {
         return listS;
 
     }
-    
+
     public Showtime getShowTimeByID(int stid) {
-        
+
         String sql = "Select * from Showtime where ShowtimeID =?";
         PreparedStatement stm;
         try {
@@ -62,15 +63,15 @@ public class BookingDAO extends DBConnection {
             stm.setInt(1, stid);
             ResultSet rs = stm.executeQuery();
             while (rs.next()) {
-                    Showtime show = new Showtime(
-               rs.getInt("ShowTimeID"),
-                rs.getInt("MovieID"),
-               rs.getInt("CinemaID"),
-                rs.getInt("RoomID"),
-                rs.getTimestamp("StartTime"),
-                rs.getTimestamp("EndTime")
+                Showtime show = new Showtime(
+                        rs.getInt("ShowTimeID"),
+                        rs.getInt("MovieID"),
+                        rs.getInt("CinemaID"),
+                        rs.getInt("RoomID"),
+                        rs.getTimestamp("StartTime"),
+                        rs.getTimestamp("EndTime")
                 );
-                return show;    
+                return show;
             }
 
         } catch (SQLException ex) {
@@ -79,13 +80,13 @@ public class BookingDAO extends DBConnection {
         return null;
 
     }
-    
+
     public Movie getMovieById(int id) {
         Movie movie = null;
         try {
-             String sql = "SELECT m.MovieID,m.MovieName,m.Duration,m.Genre,m.Director,m.ReleaseDate\n" +
-"      ,m.Description,m.Rate,i.ImagePath,m.TrailerURL,m.BasePrice,m.Status\n" +
-"  FROM [dbo].[Movie] m join Image i on m.MoviePoster = i.ImageID WHERE MovieID = ?";
+            String sql = "SELECT m.MovieID,m.MovieName,m.Duration,m.Genre,m.Director,m.ReleaseDate\n"
+                    + "      ,m.Description,m.Rate,i.ImagePath,m.TrailerURL,m.BasePrice,m.Status\n"
+                    + "  FROM [dbo].[Movie] m join Image i on m.MoviePoster = i.ImageID WHERE MovieID = ?";
             PreparedStatement stm = conn.prepareStatement(sql);
             stm.setInt(1, id);
             ResultSet rs = stm.executeQuery();
@@ -231,7 +232,7 @@ public class BookingDAO extends DBConnection {
         int ticketID = -1;
         String sql = "INSERT INTO Ticket (SeatID, ShowtimeID, ComboID, Status) VALUES (?, ?, ?, 0)";
 
-        try ( PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             ps.setInt(1, ticket.getSeatID());
             ps.setInt(2, ticket.getShowTimeID());
@@ -252,29 +253,129 @@ public class BookingDAO extends DBConnection {
     }
 
     public int insertTicketWithOutCombo(Ticket ticket) {
-    int ticketID = -1;
-    String sql = "INSERT INTO Ticket (SeatID, ShowtimeID, Status) VALUES (?, ?, 0)";
+        int ticketID = -1;
+        String sql = "INSERT INTO Ticket (SeatID, ShowtimeID, Status) VALUES (?, ?, 0)";
 
-    try (
-         PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-        
-        ps.setInt(1, ticket.getSeatID());
-        ps.setInt(2, ticket.getShowTimeID());
-        int affectedRows = ps.executeUpdate();
+        try (
+                PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-        // Lấy ID của vé vừa được thêm vào
-        if (affectedRows > 0) {
-            ResultSet rs = ps.getGeneratedKeys();
-            if (rs.next()) {
-                ticketID = rs.getInt(1);
+            ps.setInt(1, ticket.getSeatID());
+            ps.setInt(2, ticket.getShowTimeID());
+            int affectedRows = ps.executeUpdate();
+
+            // Lấy ID của vé vừa được thêm vào
+            if (affectedRows > 0) {
+                ResultSet rs = ps.getGeneratedKeys();
+                if (rs.next()) {
+                    ticketID = rs.getInt(1);
+                }
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-    } catch (SQLException e) {
-        e.printStackTrace();
+        return ticketID;
     }
-    return ticketID;
-}
+    
+    public Seat getSeatByID(int sid) {
+        
+        String sql = "Select * from Seat where SeatID =? ";
+        PreparedStatement stm;
+        try {
+            stm = conn.prepareStatement(sql);
+            stm.setInt(1, sid);
 
+            ResultSet rs = stm.executeQuery();
+            while (rs.next()) {
+                Seat seat = new Seat(
+                rs.getInt("SeatID"),
+               rs.getString("SeatRow"),
+                rs.getInt("SeatNumber"),
+              rs.getString("SeatType"),
+                rs.getInt("RoomID"),
+               rs.getString("Status")
+                );
+                return seat;
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(BookingDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+
+    }
+    
+    public List<Room> getRoomByCinema(int mid) {
+        List<Room> listS = new ArrayList<>();
+        String sql = "Select * from Room where CinemaID = ?";
+        PreparedStatement stm;
+        try {
+            stm = conn.prepareStatement(sql);
+            stm.setInt(1, mid);
+            ResultSet rs = stm.executeQuery();
+            while (rs.next()) {
+                Room show = new Room();
+                show.setRoomID(rs.getInt("RoomID"));
+                show.setCinemaID(rs.getInt("CinemaID"));
+                show.setRoomName(rs.getString("RoomName"));
+                show.setRoomType(rs.getString("RoomType"));
+                show.setStatus(rs.getBoolean("Status"));
+                listS.add(show);
+            }
+
+        } catch (SQLException ex) {
+            Logger.getLogger(BookingDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return listS;
+
+    }
+    
+    public int updateSeatBooking(int sid) {
+        Seat seat = getSeatByID(sid);
+        int affectedRow = 0;
+        String sql = "UPDATE [dbo].[Seat] SET [Status] = 'Processing' WHERE SeatID = ?";
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+
+            
+
+            ps.setInt(1, seat.getSeatID());
+            affectedRow = ps.executeUpdate();
+        } catch (SQLException ex) {
+            Logger.getLogger(CinemaRoomDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return affectedRow;
+    }
+
+    public int updateSeatPayment(int sid) {
+        Seat seat = getSeatByID(sid);
+        int affectedRow = 0;
+        String sql = "UPDATE [dbo].[Seat] SET [Status] = 'Booked' WHERE SeatID = ?";
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+
+             ps.setInt(1, seat.getSeatID());
+            affectedRow = ps.executeUpdate();
+        } catch (SQLException ex) {
+            Logger.getLogger(CinemaRoomDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return affectedRow;
+    }
+    
+    public int updateSeatEndTime(int sid) {
+        Seat seat = getSeatByID(sid);
+        int affectedRow = 0;
+        String sql = "UPDATE [dbo].[Seat] SET [Status] = 'Available' WHERE SeatID = ?";
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+
+             ps.setInt(1, seat.getSeatID());
+            affectedRow = ps.executeUpdate();
+        } catch (SQLException ex) {
+            Logger.getLogger(CinemaRoomDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return affectedRow;
+    }
+
+    
 
     public static void main(String[] args) {
         BookingDAO dao = new BookingDAO();

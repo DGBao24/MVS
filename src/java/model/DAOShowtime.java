@@ -11,15 +11,17 @@ public class DAOShowtime extends DBConnection {
     
     public int insertShowtime(Showtime showtime) {
     int affectedRow = 0;
-    String sql = "INSERT INTO Showtime (MovieID, StartTime, EndTime) VALUES (?, ?, ?)";
+    String sql = "INSERT INTO Showtime (MovieID, CinemaID, RoomID, StartTime, EndTime) VALUES (?,?,?, ?, ?)";
     try {
         if (conn == null || conn.isClosed()) {
             connect();
         }
         PreparedStatement ps = conn.prepareStatement(sql);
         ps.setInt(1, showtime.getMovieID());
-        ps.setTimestamp(2, showtime.getStartTime());
-        ps.setTimestamp(3, showtime.getEndTime());
+        ps.setInt(2, showtime.getCinemaID());
+        ps.setInt(3, showtime.getRoomID());
+        ps.setTimestamp(4, showtime.getStartTime());
+        ps.setTimestamp(5, showtime.getEndTime());
         affectedRow = ps.executeUpdate();
     } catch (SQLException ex) {
         Logger.getLogger(DAOShowtime.class.getName()).log(Level.SEVERE, null, ex);
@@ -77,6 +79,8 @@ public class DAOShowtime extends DBConnection {
                 Showtime showtime = new Showtime(
                         rs.getInt("ShowtimeID"), 
                         rs.getInt("MovieID"), 
+                        rs.getInt("CinemaID"),
+                        rs.getInt("RoomID"),
                         rs.getTimestamp("StartTime"), 
                         rs.getTimestamp("EndTime")
                 );

@@ -199,7 +199,7 @@
 
                                     <div class="form-group row mt-4">
                                         <div class="col-sm-12 text-center">
-                                            <button type="submit" class="btn btn-primary">
+                                            <button type="submit" name="submit" class="btn btn-primary">
                                                 Update Profile
                                             </button>
                                         </div>

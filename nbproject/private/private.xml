@@ -12,11 +12,14 @@
             <file>file:/D:/FPTU/Spring25/SWP/MVS/src/java/entity/Showtime.java</file>
             <file>file:/D:/FPTU/Spring25/SWP/MVS/web/ticket-confirmation.jsp</file>
             <file>file:/D:/FPTU/Spring25/SWP/MVS/src/java/controller/ComboController.java</file>
+            <file>file:/D:/FPTU/Spring25/SWP/MVS/src/java/model/DAOAccount.java</file>
             <file>file:/D:/FPTU/Spring25/SWP/MVS/src/java/model/DAOShowtime.java</file>
+            <file>file:/D:/FPTU/Spring25/SWP/MVS/src/java/controller/SignUpController.java</file>
             <file>file:/D:/FPTU/Spring25/SWP/MVS/src/java/model/BookingDAO.java</file>
             <file>file:/D:/FPTU/Spring25/SWP/MVS/src/java/controller/CustomerAccountController.java</file>
             <file>file:/D:/FPTU/Spring25/SWP/MVS/src/java/controller/MovieController.java</file>
             <file>file:/D:/FPTU/Spring25/SWP/MVS/web/select_ticket.jsp</file>
+            <file>file:/D:/FPTU/Spring25/SWP/MVS/web/Profile.jsp</file>
         </group>
     </open-files>
 </project-private>

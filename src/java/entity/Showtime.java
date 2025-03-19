@@ -18,6 +18,14 @@ public class Showtime {
         this.endTime = endTime;
     }
 
+    public Showtime(int movieID, int CinemaID, int RoomID, Timestamp startTime, Timestamp endTime) {
+        this.movieID = movieID;
+        this.CinemaID = CinemaID;
+        this.RoomID = RoomID;
+        this.startTime = startTime;
+        this.endTime = endTime;
+    }
+        
     public Showtime(int showtimeID, int movieID, int CinemaID, int RoomID, Timestamp startTime, Timestamp endTime) {
         this.showtimeID = showtimeID;
         this.movieID = movieID;
