@@ -46,7 +46,7 @@ public class SeatController extends HttpServlet {
                     seat = sdao.getSeatID(sid);
                     request.setAttribute("seat", seat);
                     request.setAttribute("success", "Update successful");
-                    request.getRequestDispatcher("admin/seat-management.jsp").forward(request, response);
+                    request.getRequestDispatcher("seat?service=listAll").forward(request, response);
                 } else {
                     request.setAttribute("error", "Update Failed");
                     request.getRequestDispatcher("admin/updateSeat.jsp").forward(request, response);
