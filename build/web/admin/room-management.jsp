@@ -66,7 +66,11 @@
                                         </div>
                                         <div class="form-group">
                                             <label>Room Type:</label>
-                                            <input type="text" class="form-control" name="RoomType" required>
+                                            <select class="form-control" name="RoomType" required>
+                                                <option value="Standard">Standard</option>
+                                                <option value="VIP">VIP</option>
+                                                <option value="IMAX">IMAX</option>
+                                            </select>
                                         </div>
                                         <div class="form-group">
                                             <label>Status:</label>

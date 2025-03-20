@@ -194,7 +194,7 @@ public class DAOAccount extends DBConnection {
 
     public int updateCustomer(Account acc) {
         int result = 0;
-        String sql = "UPDATE Account SET Name=?, PhoneNum=?, Address=?, YearOfBirth=? ,Gender=? WHERE AccountID=?";
+        String sql = "UPDATE Account SET Name=?, PhoneNumber=?, Address=?, YearOfBirth=? ,Gender=? WHERE AccountID=?";
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, acc.getName());
@@ -429,11 +429,13 @@ public class DAOAccount extends DBConnection {
 //            System.out.println("Đăng nhập thất bại: không tìm thấy tài khoản với thông tin đã cung cấp.");
 //        }
 
-    List<Account> list = dao.getAllCustomers("Select*from Account where Name like '%John%'");
-    
-    for(Account acc : list){
-        System.out.println(acc);
-    }
+//    List<Account> list = dao.getAllCustomers("Select*from Account where Name like '%John%'");
+//    
+//    for(Account acc : list){
+//        System.out.println(acc);
+//    }
+Account acc = new Account("Hax","abcd@gmail.com","B@o11711","0987564321","Add",2004,true,"Customer","Male");
+ int n = dao.createAccount(acc);
     }
 
 }

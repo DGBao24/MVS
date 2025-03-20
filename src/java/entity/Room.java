@@ -35,6 +35,10 @@ public class Room {
         this.RoomType = RoomType;
         this.Status = Status;
     }
+
+    public Room() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
     
     
 

@@ -1,7 +1,14 @@
 package controller;
 
+import entity.Cinema;
+import entity.Movie;
+import entity.Room;
 import entity.Showtime;
 import model.DAOShowtime;
+import model.BookingDAO;
+import model.CinemaDAO;
+import model.MovieDAO;
+import java.sql.ResultSet;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.List;
@@ -13,101 +20,122 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @WebServlet(name = "ShowtimeController", urlPatterns = {"/admin/showtime"})
 public class ShowtimeController extends HttpServlet {
-    
+
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         String service = request.getParameter("service");
-        DAOShowtime dao = new DAOShowtime();
-        
+        DAOShowtime show = new DAOShowtime();
+
         if (service == null) {
             service = "listAll";
         }
-        
-        switch (service) {
-            case "deleteShowtime":
-                dao.deleteShowtime(Integer.parseInt(request.getParameter("id")));
-                response.sendRedirect(request.getContextPath() + "/admin/showtime?service=listAll");
-                break;
+
+        String submit = request.getParameter("add");
+
+        if (service.equals("listAll")) {
+            ResultSet rsMov = show.getData("SELECT MovieID, MovieName FROM Movie");
+            request.setAttribute("rsMov", rsMov);
+
+            ResultSet rsCin = show.getData("SELECT CinemaID, CinemaName FROM Cinema");
+            request.setAttribute("rsCin", rsCin);
+            List<Showtime> showtime = show.getAllShowtimes();
+            request.setAttribute("showtime", showtime);
+            request.getRequestDispatcher("/admin/showtime-management.jsp").forward(request, response);
+
+        }
+        if (service.equals("addShowtime")) {
+            // Luôn lấy danh sách movie và cinema
+            ResultSet rsMov = show.getData("SELECT MovieID, MovieName FROM Movie");
+            request.setAttribute("rsMov", rsMov);
+
+            ResultSet rsCin = show.getData("SELECT CinemaID, CinemaName FROM Cinema");
+            request.setAttribute("rsCin", rsCin);
             
-            case "updateShowtime":
-                String submitUpdate = request.getParameter("submit");
-                if (submitUpdate == null) {
-                    int id = Integer.parseInt(request.getParameter("id"));
-                    Showtime showtime = dao.getShowtimeByID(id);
-                    request.setAttribute("showtime", showtime);
-                    request.getRequestDispatcher("/admin/updateShowtime.jsp").forward(request, response);
-                } else {
-                    try {
-                        int showtimeID = Integer.parseInt(request.getParameter("ShowtimeID"));
-                        int movieID = Integer.parseInt(request.getParameter("MovieID"));
-                        Timestamp startTime = Timestamp.valueOf(request.getParameter("StartTime"));
-                        Timestamp endTime = Timestamp.valueOf(request.getParameter("EndTime"));
-                        
-                        Showtime showtime = new Showtime(showtimeID, movieID, startTime, endTime);
-                        int n = dao.updateShowtime(showtime);
-                        
-                        if (n > 0) {
-                            request.getSession().setAttribute("successMessage", "Showtime updated successfully!");
-                        } else {
-                            request.getSession().setAttribute("errorMessage", "Failed to update showtime");
-                        }
-                        response.sendRedirect(request.getContextPath() + "/admin/showtime?service=listAll");
-                    } catch (Exception e) {
-                        request.getSession().setAttribute("errorMessage", "Invalid input data");
-                        response.sendRedirect(request.getContextPath() + "/admin/showtime?service=listAll");
-                    }
-                }
-                break;
-                
-            case "insertShowtime":
-    String submitInsert = request.getParameter("submit");
-    if (submitInsert == null) {
-        request.getRequestDispatcher("/admin/insertShowtime.jsp").forward(request, response);
-    } else {
-        try {
-            int movieID = Integer.parseInt(request.getParameter("MovieID"));
-            Timestamp startTime = Timestamp.valueOf(request.getParameter("StartTime").replace("T", " ") + ":00");
-            Timestamp endTime = Timestamp.valueOf(request.getParameter("EndTime").replace("T", " ") + ":00");
+            // Lấy danh sách showtime hiện tại
+            List<Showtime> showtime = show.getAllShowtimes();
+            request.setAttribute("showtime", showtime);
 
-            Showtime showtime = new Showtime(movieID, startTime, endTime);
-            int n = dao.insertShowtime(showtime);
+            String movieID = request.getParameter("MovieID");
+            String cinemaID = request.getParameter("CinemaID");
+            String startTime = request.getParameter("StartTime");
+            String roomID = request.getParameter("RoomID");
+            String endTime = request.getParameter("EndTime");
 
-            if (n > 0) {
-                request.getSession().setAttribute("successMessage", "Showtime added successfully!");
-            } else {
-                request.getSession().setAttribute("errorMessage", "Failed to insert showtime");
+            // Nếu có Cinema được chọn, lấy danh sách phòng
+            if (cinemaID != null && !cinemaID.isEmpty()) {
+                request.setAttribute("selectedCinemaID", cinemaID);
+                ResultSet rsRoo = show.getData("SELECT RoomID, RoomName, RoomType FROM CinemaRoom WHERE CinemaID = " + cinemaID);
+                request.setAttribute("rsRoo", rsRoo);
             }
-            response.sendRedirect(request.getContextPath() + "/admin/showtime?service=listAll");
-        } catch (Exception e) {
-            request.getSession().setAttribute("errorMessage", "Invalid input data");
-            response.sendRedirect(request.getContextPath() + "/admin/showtime?service=listAll");
-        }
-    }
-    break;
 
+            if (request.getParameter("add") != null) {
+                StringBuilder errorMessage = new StringBuilder();
                 
-            case "listAll":
-                List<Showtime> list = dao.getAllShowtimes();
-                request.setAttribute("SHOWTIME_LIST", list);
-                request.getRequestDispatcher("/admin/showtime-management.jsp").forward(request, response);
-                break;
-                
-            default:
-                response.sendRedirect(request.getContextPath() + "/admin/showtime?service=listAll");
-                break;
+                // Kiểm tra từng trường và tích lũy thông báo lỗi
+                if (movieID == null || movieID.isEmpty()) {
+                    errorMessage.append("Vui lòng chọn phim. ");
+                }
+                if (cinemaID == null || cinemaID.isEmpty()) {
+                    errorMessage.append("Vui lòng chọn rạp. ");
+                }
+                if (roomID == null || roomID.isEmpty()) {
+                    errorMessage.append("Vui lòng chọn phòng chiếu. ");
+                }
+                if (startTime == null || startTime.isEmpty()) {
+                    errorMessage.append("Vui lòng chọn thời gian bắt đầu. ");
+                }
+                if (endTime == null || endTime.isEmpty()) {
+                    errorMessage.append("Vui lòng chọn thời gian kết thúc. ");
+                }
+
+                // Nếu không có lỗi, tiến hành thêm showtime
+                if (errorMessage.length() == 0) {
+                    try {
+                        int mid = Integer.parseInt(movieID);
+                        int cid = Integer.parseInt(cinemaID);
+                        int rid = Integer.parseInt(roomID);
+                        
+                        // Chuyển đổi định dạng thời gian từ HTML datetime-local sang Timestamp
+                        startTime = startTime.replace("T", " ") + ":00";
+                        endTime = endTime.replace("T", " ") + ":00";
+                        
+                        Timestamp StartTime = Timestamp.valueOf(startTime);
+                        Timestamp EndTime = Timestamp.valueOf(endTime);
+
+                        // Kiểm tra thời gian hợp lệ
+                        if (EndTime.before(StartTime)) {
+                            request.setAttribute("message", "Thời gian kết thúc phải sau thời gian bắt đầu!");
+                        } else {
+                            Showtime showtimes = new Showtime(mid, cid, rid, StartTime, EndTime);
+                            int n = show.insertShowtime(showtimes);
+                            if (n > 0) {
+                                request.setAttribute("message", "Thêm suất chiếu thành công!");
+                                // Cập nhật lại danh sách showtime
+                                showtime = show.getAllShowtimes();
+                                request.setAttribute("showtime", showtime);
+                            } else {
+                                request.setAttribute("message", "Thêm suất chiếu thất bại!");
+                            }
+                        }
+                    } catch (Exception e) {
+                        request.setAttribute("message", "Lỗi xử lý dữ liệu: " + e.getMessage());
+                    }
+                } else {
+                    request.setAttribute("message", errorMessage.toString());
+                }
+            }
+            request.getRequestDispatcher("/admin/showtime-management.jsp").forward(request, response);
         }
     }
-    
+
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         processRequest(request, response);
     }
-    
+
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         processRequest(request, response);
     }
 }
