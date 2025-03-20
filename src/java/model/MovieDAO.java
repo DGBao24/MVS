@@ -223,6 +223,8 @@ public class MovieDAO extends DBConnection {
     public static void main(String[] args) {
         MovieDAO dao = new MovieDAO();
               SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+              List<Movie> list = dao.getMovie("select* from Movie where Genre = 'Action'");
+              System.out.println(list);
 //        try {
 //            //        List<Movie> list = dao.getListShowingMovie();
 ////        System.out.println(list);
