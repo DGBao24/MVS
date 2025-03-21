@@ -26,7 +26,6 @@ import jakarta.servlet.annotation.MultipartConfig;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 
-
 /**
  *
  * @author pdatt
@@ -77,62 +76,62 @@ public class AdminMovieController extends HttpServlet {
                         String TrailerURL = request.getParameter("TrailerURL");
                         int BasePrice = Integer.parseInt(request.getParameter("BasePrice"));
                         String Status = request.getParameter("Status");
-                        
+
                         Part filePart = request.getPart("MoviePoster");
                         String imageId = null;
-                        
-                        if (filePart != null && filePart.getSize() > 0) {
-                            // Handle new image upload
-                            String deploymentPath = request.getServletContext().getRealPath("") + File.separator + "images";
-                            String projectPath = System.getProperty("user.dir") + File.separator + "web" + File.separator + "images";
-                            
-                            // Create directories if they don't exist
-                            File deploymentDir = new File(deploymentPath);
-                            File projectDir = new File(projectPath);
-                            deploymentDir.mkdirs();
-                            projectDir.mkdirs();
 
-                            // Generate unique filename
-                            String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
-                            String extension = fileName.substring(fileName.lastIndexOf("."));
-                            String uniqueFileName = UUID.randomUUID().toString() + extension;
+                       if (filePart != null && filePart.getSize() > 0) {
+    // Handle new image upload
+    String deploymentPath = request.getServletContext().getRealPath("") + File.separator + "images";
+    String projectPath = System.getProperty("user.dir") + File.separator + "web" + File.separator + "images";
 
-                            // Save file in both locations
-                            String deploymentFilePath = deploymentPath + File.separator + uniqueFileName;
-                            String projectFilePath = projectPath + File.separator + uniqueFileName;
+    // Create directories if they don't exist
+    File deploymentDir = new File(deploymentPath);
+    File projectDir = new File(projectPath);
+    deploymentDir.mkdirs();
+    projectDir.mkdirs();
 
-                            filePart.write(deploymentFilePath);
-                            Files.copy(new File(deploymentFilePath).toPath(), new File(projectFilePath).toPath(), 
-                                      StandardCopyOption.REPLACE_EXISTING);
+    // Generate unique filename
+    String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
+    String extension = fileName.substring(fileName.lastIndexOf("."));
+    String uniqueFileName = UUID.randomUUID().toString() + extension;
 
-                            // Save image to database
-                            imageId = String.valueOf(daoImage.saveMovieImage(uniqueFileName));
-                        } else {
-                            // Keep existing image
-                            Movie existingMovie = dao.getMovieById(MovieID);
-                            if (existingMovie != null) {
-                                imageId = existingMovie.getMoviePoster();
-                                System.out.println("Using existing image ID: " + imageId);
-                            } else {
-                                System.out.println("Error: Could not find existing movie with ID: " + MovieID);
-                                request.getSession().setAttribute("errorMessage", "Error: Could not find existing movie.");
-                                response.sendRedirect(request.getContextPath() + "/admin/movie");
-                                return;
-                            }
-                        }
+    // Save file in both locations
+    String deploymentFilePath = deploymentPath + File.separator + uniqueFileName;
+    String projectFilePath = projectPath + File.separator + uniqueFileName;
+
+    filePart.write(deploymentFilePath);
+    Files.copy(new File(deploymentFilePath).toPath(), new File(projectFilePath).toPath(), 
+              StandardCopyOption.REPLACE_EXISTING);
+
+    // Save image to database
+    imageId = String.valueOf(daoImage.saveMovieImage(uniqueFileName));
+} else {
+    // Keep existing image if no new image is uploaded
+    Movie existingMovie = dao.getMovieById(MovieID);
+    if (existingMovie != null) {
+        imageId = existingMovie.getMoviePoster();
+        System.out.println("Using existing image ID: " + imageId);
+    } else {
+        System.out.println("Error: Could not find existing movie with ID: " + MovieID);
+        request.getSession().setAttribute("errorMessage", "Error: Could not find existing movie.");
+        response.sendRedirect(request.getContextPath() + "/admin/movie");
+        return;
+    }
+}
 
                         // Create the updated movie object
-                        Movie updatedMovie = new Movie(MovieID, MovieName, Duration, Genre, Director, 
-                                                     ReleaseDate, Description, Rate, imageId, 
-                                                     TrailerURL, BasePrice, Status);
-                        
+                        Movie updatedMovie = new Movie(MovieID, MovieName, Duration, Genre, Director,
+                                ReleaseDate, Description, Rate, imageId,
+                                TrailerURL, BasePrice, Status);
+
                         // Debug information
                         System.out.println("Updating movie with ID: " + MovieID);
                         System.out.println("Movie Name: " + MovieName);
                         System.out.println("Image ID/Path: " + imageId);
-                        
+
                         int n = dao.updateMovie(updatedMovie);
-                        
+
                         if (n > 0) {
                             System.out.println("Movie updated successfully!");
                             request.getSession().setAttribute("successMessage", "Movie updated successfully!");
@@ -140,10 +139,10 @@ public class AdminMovieController extends HttpServlet {
                             System.out.println("Failed to update movie. No rows affected.");
                             request.getSession().setAttribute("errorMessage", "Failed to update movie. Database operation returned 0 rows affected.");
                         }
-                        
+
                         response.sendRedirect(request.getContextPath() + "/admin/movie");
                         return;
-                        
+
                     } catch (Exception e) {
                         e.printStackTrace();
                         System.out.println("Error updating movie: " + e.getMessage());
@@ -161,7 +160,7 @@ public class AdminMovieController extends HttpServlet {
                     request.getRequestDispatcher("/admin/movie-management.jsp").forward(request, response);
                     return;
                 }
-                
+
                 try {
                     SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
                     String MovieName = request.getParameter("MovieName");
@@ -175,7 +174,7 @@ public class AdminMovieController extends HttpServlet {
                     String TrailerURL = request.getParameter("TrailerURL");
                     int BasePrice = Integer.parseInt(request.getParameter("BasePrice"));
                     String Status = request.getParameter("Status");
-                    
+
                     Part filePart = request.getPart("MoviePoster");
                     // Validate file
                     if (filePart == null || filePart.getSize() == 0) {
@@ -225,8 +224,8 @@ public class AdminMovieController extends HttpServlet {
 
                     // Copy to project directory
                     try {
-                        Files.copy(new File(deploymentFilePath).toPath(), new File(projectFilePath).toPath(), 
-                                   StandardCopyOption.REPLACE_EXISTING);
+                        Files.copy(new File(deploymentFilePath).toPath(), new File(projectFilePath).toPath(),
+                                StandardCopyOption.REPLACE_EXISTING);
                     } catch (IOException e) {
                         e.printStackTrace();
                         request.getSession().setAttribute("errorMessage", "Error copying file to project directory");
@@ -245,8 +244,8 @@ public class AdminMovieController extends HttpServlet {
                     }
 
                     // Create new Movie object with the imageId as an integer
-                    Movie newMovie = new Movie(MovieName,Duration, Genre,  Director, ReleaseDate, Description, Rate, String.valueOf(imageId), TrailerURL, BasePrice, Status);
-                    
+                    Movie newMovie = new Movie(MovieName, Duration, Genre, Director, ReleaseDate, Description, Rate, String.valueOf(imageId), TrailerURL, BasePrice, Status);
+
                     int n = dao.insertMovie(newMovie);
 
                     if (n > 0) {
@@ -254,7 +253,7 @@ public class AdminMovieController extends HttpServlet {
                     } else {
                         request.getSession().setAttribute("errorMessage", "Failed to add movie to database.");
                     }
-                    
+
                     response.sendRedirect(request.getContextPath() + "/admin/movie");
                     return;
                 } catch (Exception e) {
@@ -267,10 +266,10 @@ public class AdminMovieController extends HttpServlet {
             }
 //
 //            String sql = "Select*from Movie";
-            String sql = "SELECT m.MovieID, m.MovieName, m.Duration, m.Genre, m.Director, m.ReleaseDate, " +
-                         "m.Description, m.Rate, i.ImagePath, m.TrailerURL, m.BasePrice, m.Status " +
-                         "FROM [dbo].[Movie] m " +
-                         "JOIN Image i ON m.MoviePoster = i.ImageID";
+            String sql = "SELECT m.MovieID, m.MovieName, m.Duration, m.Genre, m.Director, m.ReleaseDate, "
+                    + "m.Description, m.Rate, i.ImagePath, m.TrailerURL, m.BasePrice, m.Status "
+                    + "FROM [dbo].[Movie] m "
+                    + "JOIN Image i ON m.MoviePoster = i.ImageID";
             List<Movie> list = dao.getMovie(sql);
             request.setAttribute("listMovie", list);
 

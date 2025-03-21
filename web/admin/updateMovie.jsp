@@ -58,12 +58,7 @@
                     <input type="text" class="form-control" name="Rate" value="<%=movie.getRate()%>" required>
                 </div>
                 
-                <div class="mb-3">
-                    <label class="form-label">Current Movie Poster:</label>
-                    <img src="../images/<%= movie.getMoviePoster() %>" class="img-thumbnail" alt="<%= movie.getMovieName() %>" style="max-width: 200px;">
-                    <input type="hidden" name="currentPoster" value="<%= movie.getMoviePoster() %>">
-                </div>
-                
+            
                 <div class="mb-3">
                     <label class="form-label">Update Movie Poster (Optional):</label>
                     <input type="file" class="form-control" name="MoviePoster" accept="image/*">
@@ -85,7 +80,7 @@
                     <select class="form-control" name="Status" required>
                         <option value="NowShowing" <%= movie.getStatus().equals("NowShowing") ? "selected" : "" %>>NowShowing</option>
                         <option value="UpcomingMovie" <%= movie.getStatus().equals("UpcomingMovie") ? "selected" : "" %>>UpcomingMovie</option>
-                        <option value="EndOfShowing" <%= movie.getStatus().equals("EndOfShowing") ? "selected" : "" %>>EndOfShowing</option>
+                        <option value="ShownMovie" <%= movie.getStatus().equals("ShownMovie") ? "selected" : "" %>>ShownMovie</option>
                     </select>
                 </div>
                 
