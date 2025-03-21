@@ -117,6 +117,36 @@ public class MovieDAO extends DBConnection {
         }
         return null;
     }
+    
+    public Movie showMovieById(int id) {
+        Movie movie = null;
+        try {
+             String sql = "SELECT m.MovieID,m.MovieName,m.Duration,m.Genre,m.Director,m.ReleaseDate\n" +
+"      ,m.Description,m.Rate,i.ImagePath,m.TrailerURL,m.BasePrice,m.Status\n" +
+"  FROM [dbo].[Movie] m join Image i on m.MoviePoster = i.ImageID WHERE MovieID = ?";
+            PreparedStatement stm = conn.prepareStatement(sql);
+            stm.setInt(1, id);
+            ResultSet rs = stm.executeQuery();
+            if (rs.next()) {
+                movie = new Movie(
+                        rs.getInt(1),
+                        rs.getString(2),
+                        rs.getInt(3),
+                        rs.getString(4),
+                        rs.getString(5),
+                        rs.getDate(6),
+                        rs.getString(7),
+                        rs.getString(8),
+                        rs.getString(9),
+                        rs.getString(10),
+                        rs.getInt(11),
+                        rs.getString(12));
+            }
+        } catch (Exception ex) {
+            Logger.getLogger(model.MovieDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return movie;
+    }
 
     public List<Movie> getListShowingMovie() {
         List<Movie> list = new ArrayList<>();
@@ -315,5 +345,7 @@ int n = dao.updateMovie(new Movie(10,"Doremi", 130, "Animation", "Nobita", new D
             Logger.getLogger(MovieDAO.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+
+   
 
 }

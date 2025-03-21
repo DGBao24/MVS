@@ -1,4 +1,4 @@
-<%@page import="entity.Movie, entity.Account"%>
+<%@page import="entity.Movie, entity.Account, model.DAOImage"%>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 
 <%
@@ -10,6 +10,7 @@
 
     boolean isLoggedIn = (account != null);
     Integer customerID = (Integer) session.getAttribute("CustomerID");
+    DAOImage daoImage = new DAOImage();
 %>
 
 <!DOCTYPE html>
@@ -58,7 +59,17 @@
             %>
             <div class="row">
                 <div class="col-md-4">
-                    <img src="images/<%= movie.getMoviePoster() %>" alt="<%= movie.getMovieName() %>" class="img-fluid rounded">
+                    <% 
+                    String posterID = movie.getMoviePoster();
+                    String imagePath = "";
+                    try {
+                        int imageID = Integer.parseInt(posterID);
+                        imagePath = daoImage.getImagePathById(imageID);
+                    } catch (NumberFormatException e) {
+                        imagePath = movie.getMoviePoster();
+                    }
+                    %>
+                    <img src="images/<%= imagePath %>" alt="<%= movie.getMovieName() %>" class="img-fluid rounded">
                 </div>
                 <div class="col-md-8">
                     <h2 class="mb-4"><%= movie.getMovieName() %></h2>
@@ -95,7 +106,17 @@
             <% } else if (movie.getStatus().equals("UpcomingMovie")) { %>
             <div class="row">
                 <div class="col-md-4">
-                    <img src="images/<%= movie.getMoviePoster() %>" alt="<%= movie.getMovieName() %>" class="img-fluid rounded">
+                    <% 
+                    String posterID2 = movie.getMoviePoster();
+                    String imagePath2 = "";
+                    try {
+                        int imageID2 = Integer.parseInt(posterID2);
+                        imagePath2 = daoImage.getImagePathById(imageID2);
+                    } catch (NumberFormatException e) {
+                        imagePath2 = movie.getMoviePoster();
+                    }
+                    %>
+                    <img src="images/<%= imagePath2 %>" alt="<%= movie.getMovieName() %>" class="img-fluid rounded">
                 </div>
                 <div class="col-md-8">
                     <h2 class="mb-4"><%= movie.getMovieName() %></h2>

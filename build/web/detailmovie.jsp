@@ -51,8 +51,11 @@
 
     <main class="container py-5 mt-5">
         <div class="movie-detail">
-            <% Movie movie = (Movie) request.getAttribute("moviedetail");
-            if (movie != null) { %>
+            <% 
+            Movie movie = (Movie) request.getAttribute("moviedetail");
+            if (movie != null) { 
+                if (movie.getStatus().equals("NowShowing")) { 
+            %>
             <div class="row">
                 <div class="col-md-4">
                     <img src="images/<%= movie.getMoviePoster() %>" alt="<%= movie.getMovieName() %>" class="img-fluid rounded">
@@ -79,7 +82,7 @@
                         <a href="<%= movie.getTrailerURL() %>" target="_blank" class="btn btn-primary">
                             <i class="fas fa-play me-2"></i>Watch Trailer
                         </a>
-                        <a href="ShowtimeController?movieID=<%= movie.getMovieID() %>" class="btn btn-danger">
+                        <a href="book?movieID=<%= movie.getMovieID() %>" class="btn btn-danger">
                             <i class="fas fa-ticket-alt me-2"></i>Buy Tickets
                         </a>
                     </div>
@@ -89,7 +92,42 @@
                 <h3>Description:</h3>
                 <p class="lead"><%= movie.getDescription() %></p>
             </div>
-            <% } else { %>
+            <% } else if (movie.getStatus().equals("UpcomingMovie")) { %>
+            <div class="row">
+                <div class="col-md-4">
+                    <img src="images/<%= movie.getMoviePoster() %>" alt="<%= movie.getMovieName() %>" class="img-fluid rounded">
+                </div>
+                <div class="col-md-8">
+                    <h2 class="mb-4"><%= movie.getMovieName() %></h2>
+                    <div class="mb-3">
+                        <strong>Director:</strong> <%= movie.getDirector() %>
+                    </div>
+                    <div class="mb-3">
+                        <strong>Genre:</strong> <%= movie.getGenre() %>
+                    </div>
+                    <div class="mb-3">
+                        <strong>Duration:</strong> <%= movie.getDuration() %> minutes
+                    </div>
+
+                    <div class="mb-4">
+                        <strong>Release Date:</strong> <%= movie.getReleaseDate() %>
+                    </div>
+                     <div class="mb-3">
+                        <strong>Price:</strong> <%= movie.getBasePrice() %> VND
+                    </div>
+                    <div class="d-flex gap-3">
+                        <a href="<%= movie.getTrailerURL() %>" target="_blank" class="btn btn-primary">
+                            <i class="fas fa-play me-2"></i>Watch Trailer
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-4">
+                <h3>Description:</h3>
+                <p class="lead"><%= movie.getDescription() %></p>
+            </div>
+            <% }
+               } else { %>
             <div class="alert alert-warning" role="alert">
                 Movie details not found.
             </div>
@@ -115,4 +153,4 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://kit.fontawesome.com/your-font-awesome-kit.js"></script>
 </body>
-</html>
+</html> 

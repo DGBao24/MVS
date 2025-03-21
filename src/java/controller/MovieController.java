@@ -46,7 +46,7 @@ public class MovieController extends HttpServlet {
                 request.getRequestDispatcher("movie.jsp").forward(request, response);
             } else if (service.equals("detail")) {
                 int movieId = Integer.parseInt(request.getParameter("id"));
-                Movie movie = dao.getMovieById(movieId);
+                Movie movie = dao.showMovieById(movieId);
                 request.setAttribute("moviedetail", movie);
                 request.getRequestDispatcher("detailmovie.jsp").forward(request, response);
             }
