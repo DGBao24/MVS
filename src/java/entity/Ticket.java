@@ -14,7 +14,7 @@ public class Ticket {
     private int TicketID;
     private int SeatID;
     private int ShowTimeID;
-    private int ComboID;
+    private int OrderID;
     private boolean Status;
 
     public Ticket() {
@@ -25,17 +25,17 @@ public class Ticket {
         this.ShowTimeID = ShowTimeID;
     }
 
-    public Ticket(int SeatID, int ShowTimeID, int ComboID) {
+    public Ticket(int SeatID, int ShowTimeID, int OrderID) {
         this.SeatID = SeatID;
         this.ShowTimeID = ShowTimeID;
-        this.ComboID = ComboID;
+        this.OrderID = OrderID;
     }
 
-    public Ticket(int TicketID, int SeatID, int ShowTimeID, int ComboID, boolean Status) {
+    public Ticket(int TicketID, int SeatID, int ShowTimeID, int OrderID, boolean Status) {
         this.TicketID = TicketID;
         this.SeatID = SeatID;
         this.ShowTimeID = ShowTimeID;
-        this.ComboID = ComboID;
+        this.OrderID = OrderID;
         this.Status = Status;
     }
 
@@ -51,8 +51,8 @@ public class Ticket {
         this.ShowTimeID = ShowTimeID;
     }
 
-    public void setComboID(int ComboID) {
-        this.ComboID = ComboID;
+    public void setOrderID(int OrderID) {
+        this.OrderID = OrderID;
     }
 
     public void setStatus(boolean Status) {
@@ -71,8 +71,8 @@ public class Ticket {
         return ShowTimeID;
     }
 
-    public int getComboID() {
-        return ComboID;
+    public int getOrderID() {
+        return OrderID;
     }
 
     public boolean isStatus() {
@@ -81,7 +81,7 @@ public class Ticket {
 
     @Override
     public String toString() {
-        return "Ticket{" + "TicketID=" + TicketID + ", SeatID=" + SeatID + ", ShowTimeID=" + ShowTimeID + ", ComboID=" + ComboID + ", Status=" + Status + '}';
+        return "Ticket{" + "TicketID=" + TicketID + ", SeatID=" + SeatID + ", ShowTimeID=" + ShowTimeID + ", OrderID=" + OrderID + ", Status=" + Status + '}';
     }
     
     

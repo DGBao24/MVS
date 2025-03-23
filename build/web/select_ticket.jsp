@@ -1,17 +1,40 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="java.util.List,java.sql.ResultSet" %>
-<%@ page import="entity.Showtime, entity.Seat, entity.Combo,entity.Movie" %>
+<%@page import="entity.Movie, entity.Account,entity.Showtime,java.sql.ResultSet,java.util.List"%>
+
+<%
+Object accObj = session.getAttribute("account");
+Account account = null;
+if (accObj instanceof Account) {
+    account = (Account) accObj;
+}
+
+    
+if (account == null) {
+    response.sendRedirect("login.jsp");
+    return; 
+}
+
+Integer customerID = (Integer) session.getAttribute("CustomerID");
+ResultSet rsCom = (ResultSet) session.getAttribute("com");
+    ResultSet rsCin = (ResultSet) session.getAttribute("cin");
+    ResultSet rsRoo = (ResultSet) session.getAttribute("roo");
+    ResultSet rsSea = (ResultSet) session.getAttribute("sea");
+    Movie movie = (Movie) request.getAttribute("movie");
+    String message = (String) request.getAttribute("mess");
+%>
+
 <!DOCTYPE html>
 <html lang="vi">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Đặt Vé - <%= ((Movie)request.getAttribute("movie")).getMovieName() %></title>
-        <!-- Bootstrap CSS -->
+        <title>Book Ticket - <%= ((Movie) request.getAttribute("movie")).getMovieName() %></title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-        <!-- Font Awesome -->
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-        <!-- Custom CSS -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+            function autoSubmit() {
+                document.getElementById('bookingForm').submit();
+            }
+        </script>
         <style>
             :root {
                 --primary-color: #1a237e;
@@ -148,15 +171,6 @@
         </style>
     </head>
     <body>
-        <%
-        ResultSet rsCom = (ResultSet) request.getAttribute("com");
-        ResultSet rsCin = (ResultSet) request.getAttribute("cin");
-        ResultSet rsRoo = (ResultSet) request.getAttribute("roo");
-        ResultSet rsSea = (ResultSet) request.getAttribute("sea");
-        Movie movie = (Movie) request.getAttribute("movie");
-        String message = (String) request.getAttribute("mess");
-        %>
-        
         <div class="booking-container">
             <div class="movie-header">
                 <h1 class="display-6 mb-0"><i class="fas fa-film me-2"></i><%= movie.getMovieName() %></h1>
@@ -165,11 +179,11 @@
             <form id="bookingForm" action="book" method="post">
                 <input type="hidden" name="movieID" value="<%= request.getParameter("movieID") != null ? request.getParameter("movieID") : "" %>">
 
-                <!-- Chọn Rạp -->
+                <!-- Ch?n R?p -->
                 <div class="form-section">
-                    <h5 class="section-title"><i class="fas fa-building me-2"></i>Chọn Rạp</h5>
+                    <h5 class="section-title"><i class="fas fa-building me-2"></i>Cinema</h5>
                     <select class="form-select" name="CinemaID" onchange="autoSubmit()">
-                        <option value="">-- Chọn rạp chiếu --</option>
+                        <option value="">-- Cinema --</option>
                         <%
                         String cinemaIDParam = request.getParameter("CinemaID");
                         if (rsCin != null) {
@@ -181,28 +195,28 @@
                     </select>
                 </div>
 
-                <!-- Chọn Giờ Chiếu -->
+                <!-- Ch?n Gi? Chi?u -->
                 <div class="form-section">
-                    <h5 class="section-title"><i class="fas fa-clock me-2"></i>Chọn Suất Chiếu</h5>
+                    <h5 class="section-title"><i class="fas fa-clock me-2"></i>Show Time</h5>
                     <select class="form-select" name="StartTime" onchange="autoSubmit()">
-                        <option value="">-- Chọn suất chiếu --</option>
+                        <option value="">-- Show Time --</option>
                         <% 
-                        List<Showtime> showtimes = (List<Showtime>) request.getAttribute("showtimes");
+                        ResultSet rsSho = (ResultSet) session.getAttribute("sho");
                         String startTimeParam = request.getParameter("StartTime");
-                        if (showtimes != null) {
-                            for (Showtime s : showtimes) { 
-                                String selected = (startTimeParam != null && startTimeParam.equals(String.valueOf(s.getStartTime()))) ? "selected" : ""; 
+                        if (rsSho != null) {
+                            while (rsSho.next()) { 
+                                String selected = (startTimeParam != null && startTimeParam.equals(String.valueOf(rsSho.getTimestamp(1)))) ? "selected" : ""; 
                         %>
-                        <option value="<%= s.getStartTime() %>" <%= selected %>><%= s.getStartTime() %></option>
+                        <option value="<%= rsSho.getTimestamp(1) %>" <%= selected %>><%= rsSho.getTimestamp(1) %>--<%=rsSho.getTimestamp(2)%></option>
                         <% } } %>
                     </select>
                 </div>
 
-                <!-- Chọn Phòng -->
+                <!-- Ch?n Ph�ng -->
                 <div class="form-section">
-                    <h5 class="section-title"><i class="fas fa-door-open me-2"></i>Chọn Phòng</h5>
+                    <h5 class="section-title"><i class="fas fa-door-open me-2"></i>Room</h5>
                     <select class="form-select" name="RoomID" onchange="autoSubmit()">
-                        <option value="">-- Chọn phòng chiếu --</option>
+                        <option value="">-- Room --</option>
                         <%
                         String roomIDParam = request.getParameter("RoomID");
                         if (rsRoo != null) {
@@ -214,9 +228,9 @@
                     </select>
                 </div>
 
-                <!-- Chọn Ghế -->
+                <!-- Ch?n Gh? -->
                 <div class="form-section">
-                    <h5 class="section-title"><i class="fas fa-couch me-2"></i>Chọn Ghế</h5>
+                    <h5 class="section-title"><i class="fas fa-couch me-2"></i>Seat</h5>
                     <div class="seat-grid">
                         <%
                         if (rsSea != null) {
@@ -233,52 +247,16 @@
                     </div>
                 </div>
 
-                <!-- Chọn Combo -->
-                <div class="form-section">
-                    <h5 class="section-title"><i class="fas fa-hamburger me-2"></i>Chọn Combo</h5>
-                    <select class="form-select" name="ComboID">
-                        <option value="">Không chọn combo</option>
-                        <%
-                        String comboIDParam = request.getParameter("ComboID");
-                        if (rsCom != null) {
-                            while (rsCom.next()) { 
-                                String selected = (comboIDParam != null && comboIDParam.equals(String.valueOf(rsCom.getInt(1)))) ? "selected" : "";
-                        %>
-                        <option value="<%= rsCom.getInt(1) %>" <%= selected %>>
-                            <%= rsCom.getString(2) %> - <%= String.format("%,.0f", rsCom.getFloat(3)) %> VND
-                        </option>
-                        <% } } %>
-                    </select>
-                </div>
 
-                <button type="submit" name="buy" class="btn btn-book">
-                    <i class="fas fa-ticket-alt me-2"></i>Xác nhận đặt vé
-                </button>
+
+                <button type="submit" name="confirm" class="btn btn-primary mt-3">Confirm</button>
             </form>
-
-            <% if (message != null) { %>
+                    <% if (message != null) { %>
             <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
                 <i class="fas fa-exclamation-circle me-2"></i><%= message %>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
             <% } %>
         </div>
-
-        <!-- Bootstrap JS -->
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-        <script>
-            function autoSubmit() {
-                document.getElementById('bookingForm').submit();
-            }
-            
-            // Thêm hiệu ứng cho việc chọn ghế
-            document.querySelectorAll('.seat-option').forEach(seat => {
-                seat.addEventListener('click', function() {
-                    const checkbox = this.querySelector('input[type="checkbox"]');
-                    checkbox.checked = !checkbox.checked;
-                    this.classList.toggle('selected', checkbox.checked);
-                });
-            });
-        </script>
-    </body>   
+    </body>
 </html>
