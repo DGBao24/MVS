@@ -236,6 +236,8 @@ public class MovieDAO extends DBConnection {
         }
         return affectedRow;
     }
+    
+    
 
 //    public int updateMovie(Movie movie) {
 //        int affectedRow = 0;
@@ -332,7 +334,7 @@ public class MovieDAO extends DBConnection {
             //        try {
 //            //        List<Movie> list = dao.getListShowingMovie();
 ////        System.out.println(list);
-int n = dao.updateMovie(new Movie(10,"Doremi", 130, "Animation", "Nobita", new Date(sdf.parse("10-3-2025").getTime()), "Hay", "PG", "5", null,  40000, "ShownMovie"));
+//int n = dao.updateMovie(new Movie(10,"Doremi", 130, "Animation", "Nobita", new Date(sdf.parse("10-3-2025").getTime()), "Hay", "PG", "5", null,  40000, "ShownMovie"));
 //if (n > 0){
 //                System.out.println("added");
 //            } else {
@@ -341,10 +343,41 @@ int n = dao.updateMovie(new Movie(10,"Doremi", 130, "Animation", "Nobita", new D
 //        } catch (ParseException ex) {
 //            Logger.getLogger(MovieDAO.class.getName()).log(Level.SEVERE, null, ex);
 //        }
-        } catch (ParseException ex) {
+        } catch (Exception ex) {
             Logger.getLogger(MovieDAO.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+
+    public List<Movie> getMoviesByGenre(String genre) {
+    List<Movie> list = new ArrayList<>();
+     String query = "SELECT m.MovieID,m.MovieName,m.Duration,m.Genre,m.Director,m.ReleaseDate\n"
+                + "      ,m.Description,m.Rate,i.ImagePath,m.TrailerURL,m.BasePrice,m.Status\n"
+                + "  FROM [dbo].[Movie] m join Image i on m.MoviePoster = i.ImageID where m.Genre like 'UpcomingMovie'";
+    try (PreparedStatement ps = conn.prepareStatement(query)) {
+        ps.setString(1, genre);
+        ResultSet rs = ps.executeQuery();
+        while (rs.next()) {
+            list.add(new Movie(
+                rs.getInt(1),
+                rs.getString(2),
+                rs.getInt(3),
+                rs.getString(4),
+                rs.getString(5),
+                rs.getDate(6),
+                rs.getString(7),
+                rs.getString(8),
+                rs.getString(9),
+                rs.getString(10),
+                rs.getInt(11),
+                rs.getString(12)
+            ));
+        }
+    } catch (SQLException e) {
+        Logger.getLogger(MovieDAO.class.getName()).log(Level.SEVERE, "Error filtering movies by genre", e);
+    }
+    return list;
+}
+
 
    
 

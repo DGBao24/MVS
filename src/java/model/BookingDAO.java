@@ -6,6 +6,9 @@ package model;
 
 import entity.Combo;
 import entity.Movie;
+import entity.Order;
+import entity.OrderCombo;
+import entity.Promotion;
 import entity.Room;
 import entity.Seat;
 import entity.Showtime;
@@ -230,13 +233,13 @@ public class BookingDAO extends DBConnection {
 
     public int insertTicket(Ticket ticket) {
         int ticketID = -1;
-        String sql = "INSERT INTO Ticket (SeatID, ShowtimeID, ComboID, Status) VALUES (?, ?, ?, 0)";
+        String sql = "INSERT INTO Ticket (SeatID, ShowtimeID, OrderID, Status) VALUES (?, ?, ?, 0)";
 
         try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             ps.setInt(1, ticket.getSeatID());
             ps.setInt(2, ticket.getShowTimeID());
-            ps.setInt(3, ticket.getComboID());
+            ps.setInt(3, ticket.getOrderID());
             int affectedRows = ps.executeUpdate();
 
             // Lấy ID của vé vừa được thêm vào
@@ -389,11 +392,318 @@ public class BookingDAO extends DBConnection {
         return ticketIDs;
     }
 
-    public static void main(String[] args) {
-        BookingDAO dao = new BookingDAO();
-        List<Seat> list = dao.getSeatByRoom(1);
-        for (Seat time : list) {
-            System.out.println(time);
+    public Combo getComboByID(int cid) {
+        String sql = "SELECT [ComboID],[ComboItem],[Description],[Price],[Quantity],[Status] FROM [swp391].[dbo].[Combo] where ComboID = ?";
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setInt(1, cid);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                int row = 1;
+                Combo combo = new Combo(rs.getInt(row++), rs.getString(row++), rs.getString(row++), rs.getFloat(row++), rs.getInt(row++), rs.getBoolean(row++));
+                return combo;
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(DAOPromotion.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+    }
+
+    public boolean decrementPromotionRedemption(int promotionId) {
+        String sql = "UPDATE [dbo].[Promotion] SET [RemainRedemption] = [RemainRedemption] - 1 "
+                + "WHERE [PromotionID] = ? AND [RemainRedemption] > 0 AND [Status] = 1";
+
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setInt(1, promotionId);
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException ex) {
+            Logger.getLogger(BookingDAO.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
         }
     }
+
+    public Promotion validatePromotion(String promoCode) {
+        String sql = "SELECT * FROM [dbo].[Promotion] "
+                + "WHERE [PromoCode] = ? AND [Status] = 1 "
+                + "AND [StartDate] <= GETDATE() AND [EndTime] >= GETDATE() "
+                + "AND [RemainRedemption] > 0";
+
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, promoCode);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                Promotion promotion = new Promotion();
+                promotion.setPromotionID(rs.getInt("PromotionID"));
+                promotion.setPromoCode(rs.getString("PromoCode"));
+                promotion.setDiscountPercent(rs.getInt("DiscountPercent"));
+                promotion.setStartDate(rs.getDate("StartDate"));
+                promotion.setEndDate(rs.getDate("EndTime"));
+                promotion.setStatus(rs.getBoolean("Status"));
+                promotion.setDescription(rs.getString("Description"));
+                promotion.setRemainRedemption(rs.getInt("RemainRedemption"));
+
+                return promotion;
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(BookingDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return null;
+    }
+
+    public int insertOrder(int accountId, Timestamp orderDate, String status) {
+        int orderId = -1;
+        String sql = "INSERT INTO [dbo].[Order] (AccountID, OrderDate,TotalAmount,SeatQuantity,  Status) "
+                + "VALUES (?, ?,0,0,?)";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+            ps.setInt(1, accountId);
+            ps.setTimestamp(2, orderDate);
+
+            ps.setString(3, status);
+
+            int affectedRows = ps.executeUpdate();
+            if (affectedRows > 0) {
+                try (ResultSet rs = ps.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        orderId = rs.getInt(1);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return orderId;
+    }
+
+    public void insertOrderCombo(int orderID, int comboID,int quantity,double price) {
+        String sql = "INSERT INTO OrderCombo (OrderID, ComboID,Quantity,Price) VALUES (?, ?,?,?)";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, orderID);
+            ps.setInt(2, comboID);
+            ps.setInt(3, quantity);
+            ps.setDouble(4, price);
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public int updateOrderCombo(int OrderComboID,int OrderID,int ComboID,int Quantity,double price) {
+        String sql = "UPDATE OrderCombo SET OrderID=?, ComboID=?,Quantity=?,Price=? Where OrderComboID= ?";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1,OrderID);
+            ps.setInt(2, OrderID);
+            
+            ps.setInt(3, Quantity);
+            ps.setDouble(4, price);
+            ps.setInt(5, OrderComboID);
+
+            return ps.executeUpdate (); // Trả về số dòng bị ảnh hưởng
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return -1; // Trả về -1 nếu có lỗi
+        }
+    }
+
+    public Order getLatestOrder() {
+        Order order = null;
+        String sql = "SELECT TOP 1 * FROM [dbo].[Order] ORDER BY OrderID DESC";
+
+        try (
+                PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+
+            if (rs.next()) {
+                order = new Order();
+                order.setOrderID(rs.getInt("OrderID"));
+                order.setAccountID(rs.getInt("AccountID"));
+                order.setOrderDate(rs.getTimestamp("OrderDate"));
+                order.setTotalAmount(rs.getFloat("TotalAmount"));
+                order.setSeatQuantity(rs.getInt("SeatQuantity"));
+                order.setComboQuantity(rs.getInt("ComboQuantity"));
+                order.setPromotionID(rs.getInt("PromotionID"));
+                order.setStatus(rs.getString("Status"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            
+        }
+        return order;
+    }
+    
+    public OrderCombo getLatestOrderCombo() {
+        OrderCombo order = null;
+        String sql = "SELECT TOP 1 * FROM [dbo].[OrderCombo] ORDER BY OrderComboID DESC";
+
+        try (
+                PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+
+            if (rs.next()) {
+                order = new OrderCombo();
+                order.setOrderComboID(rs.getInt("OrderComboID"));
+                order.setOrderID(rs.getInt("OrderID"));
+                order.setComboID(rs.getInt("ComboID"));
+                order.setQuantity(rs.getInt("Quantity"));
+                order.setPrice(rs.getFloat("Price"));
+                
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            
+        }
+        return order;
+    }
+
+    public int getShowtimeID(int movieID, int cinemaID, int roomID, Timestamp startTime) {
+        String sql = "SELECT ShowTimeID FROM ShowTime WHERE MovieID = ? AND CinemaID = ? AND RoomID = ? AND StartTime = ?";
+        try {
+            PreparedStatement stm = conn.prepareStatement(sql);
+            stm.setInt(1, movieID);
+            stm.setInt(2, cinemaID);
+            stm.setInt(3, roomID);
+            stm.setTimestamp(4, startTime);
+            ResultSet rs = stm.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("ShowTimeID");
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(BookingDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return -1;
+    }
+
+    
+
+        
+
+    public int updateComboAndPromotion(int orderId, double totalAmount, int seatQuantity,int comboQuantity, int promotionId) {
+        String sql = "UPDATE [dbo].[Order] " +
+                     "SET ToTalAmount = ?, SeatQuantity = ?, ComboQuantity = ?, PromotionID = ? " +
+                     "WHERE OrderID = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setDouble(1, totalAmount);
+            ps.setInt(2, seatQuantity);
+            ps.setInt(3, comboQuantity);
+            ps.setInt(4, promotionId);
+            ps.setInt(5, orderId);
+
+            return ps.executeUpdate(); // Trả về số dòng bị ảnh hưởng
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return -1; // Trả về -1 nếu có lỗi
+        }
+    }
+    
+    public int updateComboOrder(int orderId, double totalAmount, int seatQuantity,int comboQuantity) {
+        String sql = "UPDATE [dbo].[Order] " +
+                     "SET ToTalAmount = ?, SeatQuantity = ?, ComboQuantity = ? " +
+                     "WHERE OrderID = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setDouble(1, totalAmount);
+            ps.setInt(2, seatQuantity);
+            ps.setInt(3, comboQuantity);
+           
+            ps.setInt(4, orderId);
+
+            return ps.executeUpdate(); // Trả về số dòng bị ảnh hưởng
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return -1; // Trả về -1 nếu có lỗi
+        }
+    }
+    
+    public int updatePromotionOrder(int orderId, double totalAmount, int seatQuantity, int promotionId) {
+        String sql = "UPDATE [dbo].[Order] " +
+                     "SET ToTalAmount = ?, SeatQuantity = ?, PromotionID = ? " +
+                     "WHERE OrderID = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setDouble(1, totalAmount);
+            ps.setInt(2, seatQuantity);
+            
+            ps.setInt(3, promotionId);
+            ps.setInt(4, orderId);
+
+            return ps.executeUpdate(); // Trả về số dòng bị ảnh hưởng
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return -1; // Trả về -1 nếu có lỗi
+        }
+    }
+    
+    public int updateOrderPrice(int orderId, double totalAmount) {
+        String sql = "UPDATE [dbo].[Order] " +
+                     "SET ToTalAmount = ? " +
+                     "WHERE OrderID = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setDouble(1, totalAmount);
+            ps.setInt(2, orderId);
+
+            return ps.executeUpdate(); // Trả về số dòng bị ảnh hưởng
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return -1; // Trả về -1 nếu có lỗi
+        }
+    }
+    
+    public boolean checkOrderComboExists(int orderID) {
+    String query = "SELECT COUNT(*) FROM OrderCombo WHERE OrderID = ?";
+    try (
+         PreparedStatement ps = conn.prepareStatement(query)) {
+        ps.setInt(1, orderID);
+        try (ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return false;
+}
+
+      public boolean updateOrderStatus(Order order) {
+        String sql = "UPDATE [dbo].[Order]\n"
+                + "   SET [Status] = ?\n"
+                + " WHERE OrderID = ?";
+        try {
+            PreparedStatement st = conn.prepareStatement(sql);
+            st.setString(1, order.getStatus());
+            st.setInt(2, order.getOrderID());
+            return st.executeUpdate() > 0;
+        } catch (SQLException ex) {
+           ex.printStackTrace();
+        }
+        return false;
+    }
+    
+    public static void main(String[] args) {
+        BookingDAO dao = new BookingDAO();
+        String StartTime = "2025-03-23 00:00:00.000";
+        Timestamp orderDate = Timestamp.valueOf(StartTime);
+//        List<Seat> list = dao.getSeatByRoom(1);
+//        for (Seat time : list) {
+//            System.out.println(time);
+//        }
+
+        Ticket ticket = new Ticket(2, 1, 8);
+        int n = dao.insertTicket(ticket);
+//        int n = dao.getShowtimeID(1, 1, 1, orderDate);
+//        if(n>0){
+//            System.out.println(n);
+//        }
+//    Order order = dao.getLatestOrder();
+//        System.out.println(order);
+    }
+    
 }

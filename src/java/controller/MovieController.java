@@ -31,8 +31,16 @@ public class MovieController extends HttpServlet {
         String service = request.getParameter("service");    
         try {
             MovieDAO dao = new MovieDAO();
+            
             if (service == null || service.equals("list")) {
                 // Get now showing movies
+                String genre = request.getParameter("genre");
+                if (genre != null && !genre.isEmpty()) {
+                    // Filter movies by genre
+                    List<Movie> filteredMovies = dao.getMoviesByGenre(genre);
+                    System.out.println("Filtered Movies count: " + (filteredMovies != null ? filteredMovies.size() : 0));
+                    request.setAttribute("filteredMovies", filteredMovies);
+                }
                 List<Movie> showingMovies = dao.getListShowingMovie();
                 System.out.println("Now Showing Movies count: " + (showingMovies != null ? showingMovies.size() : 0));
                 request.setAttribute("listShowing", showingMovies);
@@ -50,6 +58,7 @@ public class MovieController extends HttpServlet {
                 request.setAttribute("moviedetail", movie);
                 request.getRequestDispatcher("detailmovie.jsp").forward(request, response);
             }
+            
         } catch (Exception e) {
             e.printStackTrace();
             // Log the error and set an error message
