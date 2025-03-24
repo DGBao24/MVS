@@ -37,14 +37,14 @@ public class LoginController extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
-           
-            DAOAccount dao = new DAOAccount(); 
+
+            DAOAccount dao = new DAOAccount();
             String email = request.getParameter("email");
             String password = request.getParameter("password");
 
             // Get stored hashed password from the database
             String storedHashedPassword = dao.getPasswordByEmail(email);
-            
+
             // Handle case where email is not found
             if (storedHashedPassword == null) {
                 request.setAttribute("mess", "Wrong email or password");
@@ -55,21 +55,30 @@ public class LoginController extends HttpServlet {
             // Verify password with BCrypt
             boolean isPasswordMatch = BCrypt.checkpw(password, storedHashedPassword);
             Account account = dao.AccountLogin(email, storedHashedPassword);
-            
+
             // Check if account is null or password does not match
             if (account == null || !isPasswordMatch) {
                 request.setAttribute("mess", "Wrong email or password");
                 request.getRequestDispatcher("login.jsp").forward(request, response);
             } else {
-                HttpSession session = request.getSession();
-                session.setAttribute("account", account);
-                session.setAttribute("CustomerID", account.getAccountID());
-                request.getRequestDispatcher("home").forward(request, response);
+                if (account.isStatus()) {
+                    HttpSession session = request.getSession();
+                    session.setAttribute("account", account);
+                    session.setAttribute("CustomerID", account.getAccountID());
+                    if (account.getRole().equals("Admin") || account.getRole().equals("Manager")) {
+                        request.getRequestDispatcher("admin").forward(request, response);
+
+                    } else {
+                        request.getRequestDispatcher("home").forward(request, response);
+                    }
+                } else {
+
+                    request.getRequestDispatcher("error.jsp").forward(request, response);
+
+                }
             }
         }
     }
-        
-    
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**

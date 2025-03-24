@@ -10,6 +10,8 @@
 
     boolean isLoggedIn = (account != null);
     boolean isAdmin = isLoggedIn && "admin".equalsIgnoreCase(account.getRole());
+        boolean isManager = isLoggedIn && "Manager".equalsIgnoreCase(account.getRole());
+
     Integer customerID = (Integer) session.getAttribute("CustomerID");
 %>
 
@@ -30,7 +32,7 @@
                 object-fit: cover;
                 margin-left: 8px;
             }
-            
+
             .nav-tabs .nav-link {
                 color: #495057;
                 border: none;
@@ -38,18 +40,18 @@
                 padding: 1rem 2rem;
                 font-weight: 500;
             }
-            
+
             .nav-tabs .nav-link.active {
                 color: #7952b3;
                 background: none;
                 border-bottom: 2px solid #7952b3;
             }
-            
+
             .nav-tabs .nav-link:hover {
                 border-color: transparent;
                 color: #7952b3;
             }
-            
+
             .movie-status-badge {
                 position: absolute;
                 top: 10px;
@@ -60,17 +62,17 @@
                 font-weight: 500;
                 z-index: 1;
             }
-            
+
             .status-showing {
                 background-color: #28a745;
                 color: white;
             }
-            
+
             .status-upcoming {
                 background-color: #dc3545;
                 color: white;
             }
-            
+
             .movie-card {
                 transition: transform 0.3s ease;
                 border: none;
@@ -78,11 +80,11 @@
                 overflow: hidden;
                 box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             }
-            
+
             .movie-card:hover {
                 transform: translateY(-5px);
             }
-            
+
             .movie-card .card-img-top {
                 height: 400px;
                 object-fit: cover;
@@ -114,10 +116,10 @@
                                 <ul class="dropdown-menu dropdown-menu-dark">
                                     <li><a class="dropdown-item" href="Profile.jsp">Profile</a></li>
                                     <li><a class="dropdown-item" href="MyBookings">My Bookings</a></li>
-                                    <% if (isAdmin) { %>
+                                        <% if (isAdmin || isManager) { %>
                                     <li><hr class="dropdown-divider"></li>
                                     <li><a class="dropdown-item" href="admin">Admin Dashboard</a></li>
-                                    <% } %>
+                                        <% } %>
                                     <li><hr class="dropdown-divider"></li>
                                     <li><a class="dropdown-item" href="logout">Logout</a></li>
                                 </ul>
@@ -154,35 +156,35 @@
                         <% List<Movie> showingMovies = (List<Movie>) request.getAttribute("listShowing");
                         if (showingMovies != null && !showingMovies.isEmpty()) {
                             for (Movie movie : showingMovies) { %>
-                            <div class="col-md-6 col-lg-3">
-                                <div class="card h-100 movie-card">
-                                    <span class="movie-status-badge status-showing">Now Showing</span>
-                                    <img src="images/<%= movie.getMoviePoster() %>" class="card-img-top" alt="<%= movie.getMovieName() %>">
-                                    <div class="card-body">
-                                        <h5 class="card-title"><%= movie.getMovieName() %></h5>
-                                        <p class="card-text">
-                                            <small class="text-muted">
-                                                <%= movie.getDuration() %> mins | <%= movie.getGenre() %>
-                                            </small>
-                                        </p>
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <a href="MovieController?service=detail&id=<%= movie.getMovieID() %>" class="btn btn-primary">
-                                                <i class="fas fa-info-circle"></i> Details
-                                            </a>
-                                            <a href="ShowtimeController?movieID=<%= movie.getMovieID() %>" class="btn btn-danger">
-                                                <i class="fas fa-ticket-alt"></i> Book Now
-                                            </a>
-                                        </div>
+                        <div class="col-md-6 col-lg-3">
+                            <div class="card h-100 movie-card">
+                                <span class="movie-status-badge status-showing">Now Showing</span>
+                                <img src="images/<%= movie.getMoviePoster() %>" class="card-img-top" alt="<%= movie.getMovieName() %>">
+                                <div class="card-body">
+                                    <h5 class="card-title"><%= movie.getMovieName() %></h5>
+                                    <p class="card-text">
+                                        <small class="text-muted">
+                                            <%= movie.getDuration() %> mins | <%= movie.getGenre() %>
+                                        </small>
+                                    </p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <a href="MovieController?service=detail&id=<%= movie.getMovieID() %>" class="btn btn-primary">
+                                            <i class="fas fa-info-circle"></i> Details
+                                        </a>
+                                        <a href="book?movieID=<%= movie.getMovieID() %>" class="btn btn-danger">
+                                            <i class="fas fa-ticket-alt"></i> Book Now
+                                        </a>
                                     </div>
                                 </div>
                             </div>
+                        </div>
                         <% }
                         } else { %>
-                            <div class="col-12">
-                                <div class="alert alert-info text-center" role="alert">
-                                    No movies are currently showing.
-                                </div>
+                        <div class="col-12">
+                            <div class="alert alert-info text-center" role="alert">
+                                No movies are currently showing.
                             </div>
+                        </div>
                         <% } %>
                     </div>
                 </div>
@@ -193,31 +195,31 @@
                         <% List<Movie> upcomingMovies = (List<Movie>) request.getAttribute("listUpcoming");
                         if (upcomingMovies != null && !upcomingMovies.isEmpty()) {
                             for (Movie movie : upcomingMovies) { %>
-                            <div class="col-md-6 col-lg-3">
-                                <div class="card h-100 movie-card">
-                                    <span class="movie-status-badge status-upcoming">Coming Soon</span>
-                                    <img src="images/<%= movie.getMoviePoster() %>" class="card-img-top" alt="<%= movie.getMovieName() %>">
-                                    <div class="card-body">
-                                        <h5 class="card-title"><%= movie.getMovieName() %></h5>
-                                        <p class="card-text">
-                                            <small class="text-muted">
-                                                <%= movie.getDuration() %> mins | <%= movie.getGenre() %><br>
-                                                Release Date: <%= movie.getReleaseDate() %>
-                                            </small>
-                                        </p>
-                                        <a href="MovieController?service=detail&id=<%= movie.getMovieID() %>" class="btn btn-primary w-100">
-                                            <i class="fas fa-info-circle"></i> View Details
-                                        </a>
-                                    </div>
+                        <div class="col-md-6 col-lg-3">
+                            <div class="card h-100 movie-card">
+                                <span class="movie-status-badge status-upcoming">Coming Soon</span>
+                                <img src="images/<%= movie.getMoviePoster() %>" class="card-img-top" alt="<%= movie.getMovieName() %>">
+                                <div class="card-body">
+                                    <h5 class="card-title"><%= movie.getMovieName() %></h5>
+                                    <p class="card-text">
+                                        <small class="text-muted">
+                                            <%= movie.getDuration() %> mins | <%= movie.getGenre() %><br>
+                                            Release Date: <%= movie.getReleaseDate() %>
+                                        </small>
+                                    </p>
+                                    <a href="MovieController?service=detail&id=<%= movie.getMovieID() %>" class="btn btn-primary w-100">
+                                        <i class="fas fa-info-circle"></i> View Details
+                                    </a>
                                 </div>
                             </div>
+                        </div>
                         <% }
                         } else { %>
-                            <div class="col-12">
-                                <div class="alert alert-info text-center" role="alert">
-                                    No upcoming movies at the moment.
-                                </div>
+                        <div class="col-12">
+                            <div class="alert alert-info text-center" role="alert">
+                                No upcoming movies at the moment.
                             </div>
+                        </div>
                         <% } %>
                     </div>
                 </div>

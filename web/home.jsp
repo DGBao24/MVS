@@ -10,6 +10,7 @@
     }
     boolean isLoggedIn = (account != null);
     boolean isAdmin = isLoggedIn && "admin".equalsIgnoreCase(account.getRole());
+    boolean isManager = isLoggedIn && "Manager".equalsIgnoreCase(account.getRole());
     Integer customerID = (Integer) session.getAttribute("CustomerID");
 %>
 <!DOCTYPE html>
@@ -94,7 +95,7 @@
                                 <ul class="dropdown-menu dropdown-menu-dark">
                                     <li><a class="dropdown-item" href="Profile.jsp">Profile</a></li>
                                     <li><a class="dropdown-item" href="MyBookings">My Bookings</a></li>
-                                        <% if (isAdmin) { %>
+                                        <% if (isAdmin || isManager) { %>
                                     <li><hr class="dropdown-divider"></li>
                                     <li><a class="dropdown-item" href="admin">Admin Dashboard</a></li>
                                         <% } %>

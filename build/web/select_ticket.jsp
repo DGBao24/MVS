@@ -325,6 +325,7 @@ ResultSet rsCom = (ResultSet) session.getAttribute("com");
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
             <% } %>
+                <a href ="home" class="btn"> Back To Home</a>
         </div>
     </body>
 </html>
