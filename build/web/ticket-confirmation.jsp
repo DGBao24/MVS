@@ -249,6 +249,7 @@
         </style>
     </head>
     <body>
+
         <%
             NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
 
@@ -262,6 +263,7 @@
 
             if (comboQuantities == null) comboQuantities = new HashMap<>();
         %>
+
 
         <div class="container">
             <h2>Xác nhận vé</h2>
@@ -523,5 +525,6 @@
                 updateDisplayPrice();
             });
         </script>
+
     </body>
 </html>

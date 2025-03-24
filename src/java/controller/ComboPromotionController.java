@@ -73,6 +73,7 @@ public class ComboPromotionController extends HttpServlet {
                 LOGGER.log(Level.WARNING, "Lỗi chuyển đổi ComboQuantity", e);
             }
 
+
             String calculatedFinalPriceStr = request.getParameter("calculatedFinalPrice");
             if (calculatedFinalPriceStr != null && !calculatedFinalPriceStr.isEmpty()) {
                 try {
@@ -85,6 +86,7 @@ public class ComboPromotionController extends HttpServlet {
                     LOGGER.log(Level.WARNING, "Error parsing calculatedFinalPrice: {0}", e.getMessage());
                 }
             }
+
 
             if (lastOrder == null) {
                 request.setAttribute("mess", "Lỗi: Không tìm thấy đơn hàng!");
@@ -135,10 +137,12 @@ public class ComboPromotionController extends HttpServlet {
             session.setAttribute("comboQuantities", comboQuantities);
             session.setAttribute("finalPrice", totalPrice);
 
+
            if (confirmCombo != null) { // Xử lý xác nhận combo
                 
 
                 boolean isOrderComboExists = dao.checkOrderComboExists(lastOrder.getOrderID()); // Kiểm tra đơn hàng đã có combo chưa
+
 
                 for (String param : request.getParameterMap().keySet()) {
                     if (param.startsWith("ComboQuantity_")) {
@@ -151,6 +155,7 @@ public class ComboPromotionController extends HttpServlet {
                             comboQuantities.put(comboID, quantity);
                             totalPrice += combo.getPrice() * quantity;
 
+
                             if (isOrderComboExists) {
                                 OrderCombo lastOC = dao.getLatestOrderCombo();
                                 // Nếu đã tồn tại, thực hiện cập nhật
@@ -159,6 +164,7 @@ public class ComboPromotionController extends HttpServlet {
                                 // Nếu chưa tồn tại, thực hiện insert
                                 dao.insertOrderCombo(lastOrder.getOrderID(), comboID, quantity, combo.getPrice() * quantity);
                             }
+
                         }
                     }
                 }
@@ -174,7 +180,9 @@ public class ComboPromotionController extends HttpServlet {
                 if (appliedPromo != null) {
                     totalPrice = basePrice;
                     session.removeAttribute("appliedPromo");
+
                     session.removeAttribute("promotionID"); // Also remove the stored promotion ID
+
                 }
 
                 if (promoCode != null && !promoCode.trim().isEmpty()) {
@@ -184,6 +192,7 @@ public class ComboPromotionController extends HttpServlet {
                         totalPrice -= totalPrice * discountRate / 100;
                         session.setAttribute("appliedPromo", promoCode);
                         session.setAttribute("promotionID", pro.getPromotionID()); // Store promotion ID in session
+
                         request.setAttribute("mess", "Mã giảm giá đã được áp dụng!");
                     } else {
                         request.setAttribute("mess", "Mã giảm giá không hợp lệ!");
@@ -195,6 +204,7 @@ public class ComboPromotionController extends HttpServlet {
 
             if (pay != null) {
                 int seatQuantity = seatIDs.size();
+
                 Integer promotionID = (Integer) session.getAttribute("promotionID");
                 
                 if (!selectedCombos.isEmpty() && promotionID == null) {
@@ -209,6 +219,7 @@ public class ComboPromotionController extends HttpServlet {
                 }
                  session.setAttribute("finalPrice", totalPrice);
                 request.getRequestDispatcher("/payment.jsp").forward(request, response);
+
             } else {
                 request.getRequestDispatcher("/ticket-confirmation.jsp").forward(request, response);
             }

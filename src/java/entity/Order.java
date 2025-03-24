@@ -24,6 +24,7 @@ public class Order {
     
 
     public Order(int OrderID, int AccountID, Timestamp OrderDate, float TotalAmount, int SeatQuantity, int ComboQuantity, int PromotionID, String Status) {
+
         this.OrderID = OrderID;
         this.AccountID = AccountID;
         this.OrderDate = OrderDate;
@@ -34,7 +35,9 @@ public class Order {
         this.Status = Status;
     }
 
+
     public Order(int AccountID, Timestamp OrderDate, float TotalAmount, int SeatQuantity, String Status) {
+
         this.AccountID = AccountID;
         this.OrderDate = OrderDate;
         this.TotalAmount = TotalAmount;
@@ -74,6 +77,7 @@ public class Order {
         return PromotionID;
     }
 
+
     public String getStatus() {
         return Status;
     }
@@ -105,6 +109,7 @@ public class Order {
     public void setPromotionID(int PromotionID) {
         this.PromotionID = PromotionID;
     }
+
 
     public void setStatus(String Status) {
         this.Status = Status;

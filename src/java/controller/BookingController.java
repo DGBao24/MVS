@@ -46,8 +46,9 @@ public class BookingController extends HttpServlet {
 
                 List<Showtime> cinemas = dao.getShowTimeByMovie(mid);
 
-                ResultSet rsCin = dao.getData("SELECT s.CinemaID, c.CinemaName FROM ShowTime s "
+                ResultSet rsCin = dao.getData("SELECT DISTINCT s.CinemaID, c.CinemaName FROM ShowTime s " 
                         + "JOIN Cinema c ON c.CinemaID = s.CinemaID WHERE s.MovieID = " + mid);
+
                 session.setAttribute("movie", movie);
                 session.setAttribute("cin", rsCin);
                 session.setAttribute("cinemaList", cinemas);
@@ -57,7 +58,7 @@ public class BookingController extends HttpServlet {
             if (cinemaID != null && !cinemaID.isEmpty()) {
 
                 int cid = Integer.parseInt(cinemaID);
-                ResultSet rsSho = dao.getData("Select StartTime,EndTime From ShowTime Where MovieID=" + mid + " And CinemaID=" + cid);
+                ResultSet rsSho = dao.getData("Select StartTime,EndTime From ShowTime Where MovieID=" + mid + " And CinemaID=" + cid + "AND StartTime > DATEADD(MINUTE, 30, GETDATE())");
                 session.setAttribute("sho", rsSho);
                 request.setAttribute("selectedCinemaID", cid);
             }
@@ -108,7 +109,9 @@ public class BookingController extends HttpServlet {
                     } else {
                         try {
                             Timestamp orderDate = new Timestamp(System.currentTimeMillis());
+
                             dao.insertOrder(accountId, orderDate, "Processing");
+
                             Order lastOrder = dao.getLatestOrder();
                             for (String seat : seatIDs) {
                                 int sid = Integer.parseInt(seat);
@@ -155,10 +158,12 @@ public class BookingController extends HttpServlet {
                                             double roomFactor = ticketRs.getDouble("RoomFactor");
 
                                             totalPrice += (basePrice * seatFactor * roomFactor);
+
                                             
                                             // Save factors for later use in confirmation page
                                             session.setAttribute("seatFactor", seatFactor);
                                             session.setAttribute("roomFactor", roomFactor);
+
                                         }
                                         session.setAttribute("selectedShowtime", startTime);
                                         session.setAttribute("selectedSeats", seatIDs);

@@ -15,10 +15,9 @@ public class OrderCombo {
     private int Quantity;
     private float Price;
 
+
     public OrderCombo() {
     }
-    
-
     public OrderCombo(int OrderComboID, int OrderID, int ComboID, int Quantity, float Price) {
         this.OrderComboID = OrderComboID;
         this.OrderID = OrderID;
@@ -26,6 +25,7 @@ public class OrderCombo {
         this.Quantity = Quantity;
         this.Price = Price;
     }
+
 
     public int getOrderComboID() {
         return OrderComboID;
