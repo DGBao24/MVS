@@ -19,7 +19,55 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>CINEMATIC - Home</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
         <link rel="stylesheet" href="frontend/css/styles.css">
+        <style>
+            .movie-status-badge {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                padding: 5px 10px;
+                border-radius: 20px;
+                font-size: 0.8rem;
+                font-weight: 500;
+                z-index: 1;
+            }
+            
+            .status-showing {
+                background-color: #28a745;
+                color: white;
+            }
+            
+            .status-upcoming {
+                background-color: #dc3545;
+                color: white;
+            }
+            
+            .movie-card {
+                transition: transform 0.3s ease;
+                border: none;
+                border-radius: 15px;
+                overflow: hidden;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            }
+            
+            .movie-card:hover {
+                transform: translateY(-5px);
+            }
+            
+            .movie-card .card-img-top {
+                height: 400px;
+                object-fit: cover;
+            }
+            
+            .avatar {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                object-fit: cover;
+                margin-left: 8px;
+            }
+        </style>
     </head>
     <body>
         <header>
@@ -34,14 +82,14 @@
                             <li class="nav-item"><a class="nav-link active" href="home">HOME</a></li>
                             <li class="nav-item"><a class="nav-link" href="MovieController?service=list">MOVIES</a></li>
                             <li class="nav-item"><a class="nav-link" href="CimemaController">CINEMAS</a></li>
-                            <li class="nav-item"><a class="nav-link" href="#">MEMBERS</a></li>
+                            <li class="nav-item"><a class="nav-link" href="PromotionController?action=publicList">PROMOTIONS</a></li>
                         </ul>
                         <div class="navbar-nav">
                             <% if (isLoggedIn) { %>
-                         <%    Image avatar = account.getAvatar();%>
+                            <%    Image avatar = account.getAvatar();%>
                             <div class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                                    Welcome, <%= account.getName() %>!<img class="avatar" src="<%= avatar.getImagePath()%>" alt="Avatar" class="avatar">
+                                    Welcome, <%= account.getName() %>!<img class="avatar" src="<%= avatar.getImagePath()%>" alt="Avatar">
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-dark">
                                     <li><a class="dropdown-item" href="Profile.jsp">Profile</a></li>
@@ -61,16 +109,6 @@
                     </div>
                 </div>
             </nav>
-            <style>
-                .avatar {
-                    width: 40px;
-                    height: 40px;
-                    border-radius: 50%;
-                    object-fit: cover;
-                    margin-left: 8px;
-                }
-            </style>
-
         </header>
 
         <!-- Hero Section -->
@@ -122,8 +160,9 @@
                 if (listShowing != null && !listShowing.isEmpty()) {
                     for (Movie movie : listShowing) { %>
                 <div class="col-md-6 col-lg-3">
-                    <div class="card h-100">
-                        <img src="images/<%= movie.getMoviePoster() %>" class="card-img-top" alt="<%= movie.getMovieName() %>">
+                    <div class="card h-100 movie-card">
+                        <span class="movie-status-badge status-showing">Now Showing</span>
+                        <img src="images/<%= movie.getMoviePoster() %>" class="card-img-top" alt="<%= movie.getMovieName() %> ">
                         <div class="card-body">
                             <h5 class="card-title"><%= movie.getMovieName() %></h5>
                             <p class="card-text">
@@ -132,8 +171,12 @@
                                 </small>
                             </p>
                             <div class="d-flex justify-content-between align-items-center">
-                                <a href="MovieController?service=detail&id=<%= movie.getMovieID() %>" class="btn btn-primary">Details</a>
-                                <a href="book?movieID=<%= movie.getMovieID() %>" class="btn btn-danger">Book Now</a>
+                                <a href="MovieController?service=detail&id=<%= movie.getMovieID() %>" class="btn btn-primary">
+                                    <i class="fas fa-info-circle"></i> Details
+                                </a>
+                                <a href="book?movieID=<%= movie.getMovieID() %>" class="btn btn-danger">
+                                    <i class="fas fa-ticket-alt"></i> Book Now
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -141,7 +184,7 @@
                 <% }
             } else { %>
                 <div class="col-12">
-                    <div class="alert alert-info" role="alert">
+                    <div class="alert alert-info text-center" role="alert">
                         No movies are currently showing.
                     </div>
                 </div>
@@ -157,7 +200,8 @@
                 if (upcomingMovies != null && !upcomingMovies.isEmpty()) {
                     for (Movie movie : upcomingMovies) { %>
                 <div class="col-md-6 col-lg-3">
-                    <div class="card h-100">
+                    <div class="card h-100 movie-card">
+                        <span class="movie-status-badge status-upcoming">Coming Soon</span>
                         <img src="images/<%= movie.getMoviePoster() %>" class="card-img-top" alt="<%= movie.getMovieName() %>">
                         <div class="card-body">
                             <h5 class="card-title"><%= movie.getMovieName() %></h5>
@@ -167,14 +211,16 @@
                                     Release Date: <%= movie.getReleaseDate() %>
                                 </small>
                             </p>
-                            <a href="MovieController?service=detail&id=<%= movie.getMovieID() %>" class="btn btn-primary w-100">View Details</a>
+                            <a href="MovieController?service=detail&id=<%= movie.getMovieID() %>" class="btn btn-primary w-100">
+                                <i class="fas fa-info-circle"></i> View Details
+                            </a>
                         </div>
                     </div>
                 </div>
                 <% }
             } else { %>
                 <div class="col-12">
-                    <div class="alert alert-info" role="alert">
+                    <div class="alert alert-info text-center" role="alert">
                         No upcoming movies at the moment.
                     </div>
                 </div>
@@ -216,6 +262,6 @@
         </footer>
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="https://kit.fontawesome.com/your-font-awesome-kit.js"></script>
+        <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
     </body>
 </html>

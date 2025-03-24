@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@page import="java.util.List"%>
-<%@page import="entity.Movie,entity.Account"%>
+<%@page import="entity.Movie,entity.Account,entity.Image"%>
 <%
     Object accObj = session.getAttribute("account");
     Account account = null;
@@ -9,6 +9,7 @@
     }
 
     boolean isLoggedIn = (account != null);
+    boolean isAdmin = isLoggedIn && "admin".equalsIgnoreCase(account.getRole());
     Integer customerID = (Integer) session.getAttribute("CustomerID");
 %>
 
@@ -19,8 +20,17 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>CINEMATIC - Movies</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
         <link rel="stylesheet" href="frontend/css/styles.css">
         <style>
+            .avatar {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                object-fit: cover;
+                margin-left: 8px;
+            }
+            
             .nav-tabs .nav-link {
                 color: #495057;
                 border: none;
@@ -96,13 +106,18 @@
                         </ul>
                         <div class="navbar-nav">
                             <% if (isLoggedIn) { %>
+                            <%    Image avatar = account.getAvatar();%>
                             <div class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                                    Welcome, <%= account.getName() %>!
+                                    Welcome, <%= account.getName() %>!<img class="avatar" src="<%= avatar.getImagePath()%>" alt="Avatar">
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-dark">
                                     <li><a class="dropdown-item" href="Profile.jsp">Profile</a></li>
                                     <li><a class="dropdown-item" href="MyBookings">My Bookings</a></li>
+                                    <% if (isAdmin) { %>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="admin">Admin Dashboard</a></li>
+                                    <% } %>
                                     <li><hr class="dropdown-divider"></li>
                                     <li><a class="dropdown-item" href="logout">Logout</a></li>
                                 </ul>
@@ -242,6 +257,6 @@
         </footer>
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="https://kit.fontawesome.com/your-font-awesome-kit.js"></script>
+        <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
     </body>
 </html>

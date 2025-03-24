@@ -35,11 +35,11 @@ public class HomeControll extends HttpServlet {
             MovieDAO dao = new MovieDAO();
             
             // Get now showing movies
-            List<Movie> showingMovies = dao.getListShowingMovie();
+            List<Movie> showingMovies = dao.getTop4ShowingMovie();
             request.setAttribute("listShowing", showingMovies);
             
             // Get upcoming movies
-            List<Movie> upcomingMovies = dao.getListUpcomingMovie();
+            List<Movie> upcomingMovies = dao.getTop4UpcomingMovie();
             request.setAttribute("listUpcoming", upcomingMovies);
             
         } catch (Exception e) {

@@ -1,4 +1,4 @@
-<%@ page import="entity.Account,entity.Promotion" %>
+<%@ page import="entity.Account,entity.Promotion,entity.Image" %>
 <%@ page import="java.util.List" %>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="java.text.SimpleDateFormat" %>
@@ -12,6 +12,7 @@
     boolean isLoggedIn = (account != null);
     boolean isAdmin = isLoggedIn && "admin".equalsIgnoreCase(account.getRole());
     SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+    Integer customerID = (Integer) session.getAttribute("CustomerID");
 %>
 
 <!DOCTYPE html>
@@ -21,8 +22,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CINEMATIC - Promotions</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="frontend/css/styles.css">
     <style>
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-left: 8px;
+        }
+        
         .promotion-card {
             transition: transform 0.3s ease;
             border: none;
@@ -91,22 +101,23 @@
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav me-auto">
                         <li class="nav-item"><a class="nav-link" href="home">HOME</a></li>
-                        <li class="nav-item"><a class="nav-link" href="MovieController?action=list">MOVIES</a></li>
+                        <li class="nav-item"><a class="nav-link" href="MovieController?service=list">MOVIES</a></li>
                         <li class="nav-item"><a class="nav-link" href="CimemaController">CINEMAS</a></li>
-                        <li class="nav-item"><a class="nav-link active" href="PromotionController">PROMOTIONS</a></li>
+                        <li class="nav-item"><a class="nav-link active" href="PromotionController?action=publicList">PROMOTIONS</a></li>
                     </ul>
                     <div class="navbar-nav">
                         <% if (isLoggedIn) { %>
+                        <%    Image avatar = account.getAvatar();%>
                         <div class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                                Welcome, <%= account.getName() %>!
+                                Welcome, <%= account.getName() %>!<img class="avatar" src="<%= avatar.getImagePath()%>" alt="Avatar">
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
                                 <li><a class="dropdown-item" href="Profile.jsp">Profile</a></li>
                                 <li><a class="dropdown-item" href="MyBookings">My Bookings</a></li>
                                 <% if (isAdmin) { %>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="admin.jsp">Admin Dashboard</a></li>
+                                <li><a class="dropdown-item" href="admin">Admin Dashboard</a></li>
                                 <% } %>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" href="logout">Logout</a></li>
@@ -176,9 +187,9 @@
                 <div class="col-md-4">
                     <h5>Quick Links</h5>
                     <ul class="list-unstyled">
-                        <li><a href="MovieController?action=list" class="text-white">Movies</a></li>
+                        <li><a href="MovieController?service=list" class="text-white">Movies</a></li>
                         <li><a href="CimemaController" class="text-white">Cinemas</a></li>
-                        <li><a href="PromotionController" class="text-white">Promotions</a></li>
+                        <li><a href="PromotionController?action=publicList" class="text-white">Promotions</a></li>
                         <li><a href="#" class="text-white">Contact Us</a></li>
                     </ul>
                 </div>
@@ -199,7 +210,7 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://kit.fontawesome.com/your-font-awesome-kit.js"></script>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
     <script>
         function copyPromoCode(code) {
             navigator.clipboard.writeText(code).then(() => {
