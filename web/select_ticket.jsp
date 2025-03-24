@@ -1,4 +1,4 @@
-<%@page import="entity.Movie, entity.Account,entity.Showtime,java.sql.ResultSet,java.util.List"%>
+<%@page import="entity.Movie, entity.Account,entity.Showtime,java.sql.ResultSet,java.util.List,java.util.HashMap,java.util.Map,java.util.LinkedHashMap,java.util.ArrayList"%>
 
 <%
 Object accObj = session.getAttribute("account");
@@ -37,16 +37,18 @@ ResultSet rsCom = (ResultSet) session.getAttribute("com");
         </script>
         <style>
             :root {
-                --primary-color: #1a237e;
-                --secondary-color: #ff4081;
-                --background-color: #f5f5f5;
+                --seat-available: #d3d3d3;  /* Gh? tr?ng */
+                --seat-selected: #0044cc;   /* Gh? ?ang ch?n */
+                --seat-hold: #87CEFA;       /* Gh? ?ang gi? */
+                --seat-sold: #FF4D4D;       /* Gh? ?ã bán */
+                --seat-reserved: #FFD700;   /* Gh? ??t tr??c */
             }
-            
+
             body {
                 background-color: var(--background-color);
                 font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             }
-            
+
             .booking-container {
                 max-width: 1200px;
                 margin: 2rem auto;
@@ -55,7 +57,7 @@ ResultSet rsCom = (ResultSet) session.getAttribute("com");
                 border-radius: 15px;
                 box-shadow: 0 0 20px rgba(0,0,0,0.1);
             }
-            
+
             .movie-header {
                 background: var(--primary-color);
                 color: white;
@@ -65,7 +67,7 @@ ResultSet rsCom = (ResultSet) session.getAttribute("com");
                 position: relative;
                 overflow: hidden;
             }
-            
+
             .movie-header::after {
                 content: '';
                 position: absolute;
@@ -75,7 +77,7 @@ ResultSet rsCom = (ResultSet) session.getAttribute("com");
                 left: 0;
                 background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
             }
-            
+
             .form-section {
                 background: white;
                 padding: 1.5rem;
@@ -83,55 +85,59 @@ ResultSet rsCom = (ResultSet) session.getAttribute("com");
                 margin-bottom: 1.5rem;
                 box-shadow: 0 2px 5px rgba(0,0,0,0.05);
             }
-            
+
             .section-title {
                 color: var(--primary-color);
                 margin-bottom: 1rem;
                 font-weight: 600;
             }
-            
+
             .form-select, .form-control {
                 border: 2px solid #e0e0e0;
                 border-radius: 8px;
                 padding: 0.75rem;
                 transition: all 0.3s ease;
             }
-            
+
             .form-select:focus, .form-control:focus {
                 border-color: var(--primary-color);
                 box-shadow: 0 0 0 0.2rem rgba(26,35,126,0.25);
             }
-            
+
             .seat-grid {
                 display: grid;
                 grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
                 gap: 1rem;
                 margin: 1rem 0;
             }
-            
+
             .seat-option {
-                background: #f8f9fa;
-                border: 2px solid #e9ecef;
-                border-radius: 8px;
-                padding: 0.5rem;
+                width: 40px;
+                height: 40px;
+                background: var(--seat-available);
+                border-radius: 10px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                font-size: 14px;
+                font-weight: bold;
                 cursor: pointer;
-                transition: all 0.3s ease;
+                transition: transform 0.2s ease-in-out;
+                user-select: none;
             }
-            
+
             .seat-option:hover {
                 background: #e9ecef;
             }
-            
+
             .seat-option input[type="checkbox"] {
                 margin-right: 0.5rem;
             }
-            
+
             .seat-option.selected {
-                background: var(--primary-color);
-                color: white;
-                border-color: var(--primary-color);
+                background: var(--seat-selected);
             }
-            
+
             .btn-book {
                 background: var(--secondary-color);
                 color: white;
@@ -143,31 +149,76 @@ ResultSet rsCom = (ResultSet) session.getAttribute("com");
                 width: 100%;
                 margin-top: 1rem;
             }
-            
+
+            .seat-option.hold {
+                background: var(--seat-hold);
+            }
+
+            .seat-option.sold {
+                background: var(--seat-sold);
+                cursor: not-allowed;
+            }
+
+            .seat-option.reserved {
+                background: var(--seat-reserved);
+            }
+
+            .screen {
+                width: 80%;
+                height: 30px;
+                background: linear-gradient(to bottom, #ddd, #bbb);
+                text-align: center;
+                font-weight: bold;
+                font-size: 16px;
+                line-height: 30px;
+                margin: 20px auto;
+                border-radius: 10px;
+            }
+
+            /* L??i gh? */
+            .seat-grid {
+                display: grid;
+                grid-template-columns: repeat(10, 1fr);
+                gap: 8px;
+                justify-content: center;
+                padding: 10px;
+            }
+
             .btn-book:hover {
                 background: #f50057;
                 transform: translateY(-2px);
             }
-            
+
             .alert {
                 border-radius: 8px;
                 margin-top: 1rem;
             }
-            
+
             @media (max-width: 768px) {
                 .booking-container {
                     margin: 1rem;
                     padding: 1rem;
                 }
-                
+
                 .movie-header {
                     padding: 1.5rem;
                 }
-                
+
                 .seat-grid {
                     grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
                 }
             }
+
+            .seat-option.unavailable {
+                background: #ff4d4d; /* Màu ?? */
+                color: white;
+                border-color: #ff4d4d;
+                cursor: not-allowed;
+            }
+            .seat-option.unavailable input[type="checkbox"] {
+                display: none; /* ?n checkbox cho gh? không kh? d?ng */
+            }
+
         </style>
     </head>
     <body>
@@ -229,29 +280,46 @@ ResultSet rsCom = (ResultSet) session.getAttribute("com");
                 </div>
 
                 <!-- Ch?n Gh? -->
-                <div class="form-section">
-                    <h5 class="section-title"><i class="fas fa-couch me-2"></i>Seat</h5>
-                    <div class="seat-grid">
-                        <%
-                        if (rsSea != null) {
-                            while (rsSea.next()) { 
-                                String seatID = String.valueOf(rsSea.getInt(1));
-                                String seatLabel = rsSea.getString(3) + rsSea.getInt(4) + " | " + rsSea.getString(2);
-                        %>
-                        <div class="seat-option">
-                            <input type="checkbox" class="form-check-input" name="SeatID" value="<%= seatID %>" 
-                                   id="seat<%= seatID %>">
-                            <label class="form-check-label" for="seat<%= seatID %>"><%= seatLabel %></label>
-                        </div>
-                        <% } } %>
-                    </div>
-                </div>
+                
+<div class="screen">SCREEN</div>
+
+<div class="seat-grid">
+    <%
+    if (rsSea != null) {
+        while (rsSea.next()) { 
+            String seatID = String.valueOf(rsSea.getInt(1));
+            String seatRow = rsSea.getString(3);
+            String seatNumber = rsSea.getString(4);
+            String status = rsSea.getString(5); // Tr?ng thái gh?
+            String seatLabel = seatRow + seatNumber;
+            String seatClass = "seat-option";
+
+            // Gán class d?a trên tr?ng thái gh?
+            switch (status) {
+                case "Available": seatClass += " available"; break;
+                case "Booked": seatClass += " sold"; break;
+                case "Processing": seatClass += " hold"; break;
+               
+            }
+
+            boolean isSelectable = "Available".equalsIgnoreCase(status);
+            String disabledAttr = isSelectable ? "" : "disabled";
+
+            out.print("<div class='" + seatClass + "'>" +
+                      "<input type='checkbox' class='form-check-input' name='SeatID' value='" + seatID + "' id='seat" + seatID + "' " + disabledAttr + ">" +
+                      "<label class='form-check-label' for='seat" + seatID + "'>" + seatLabel + "</label>" +
+                      "</div>");
+        }
+    }
+    %>
+</div>
+
 
 
 
                 <button type="submit" name="confirm" class="btn btn-primary mt-3">Confirm</button>
             </form>
-                    <% if (message != null) { %>
+            <% if (message != null) { %>
             <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
                 <i class="fas fa-exclamation-circle me-2"></i><%= message %>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>

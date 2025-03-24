@@ -85,8 +85,8 @@ public class BookingController extends HttpServlet {
             if (roomID != null && !roomID.isEmpty()) {
                 int rid = Integer.parseInt(roomID);
                 List<Seat> seats = dao.getSeatByRoom(rid);
-                ResultSet rsSea = dao.getData("SELECT SeatID, SeatType, SeatRow, SeatNumber FROM Seat "
-                        + "WHERE Status = 'Available' AND RoomID = " + rid);
+                ResultSet rsSea = dao.getData("SELECT SeatID, SeatType, SeatRow, SeatNumber,Status FROM Seat "
+                        + "WHERE RoomID = " + rid + " ORDER BY SeatRow ASC, SeatNumber ASC");
                 session.setAttribute("sea", rsSea);
                 session.setAttribute("seats", seats);
                 request.setAttribute("selectedRoomID", rid);
