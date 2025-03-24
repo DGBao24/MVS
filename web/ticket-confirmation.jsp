@@ -343,6 +343,7 @@
 
             <div class="card">
                 <h3>Mã giảm giá</h3>
+                <!-- This form only applies the promotion when the submit button is clicked, not when entering text -->
                 <form id="promoForm" action="combo-promotion" method="post">
                     <input type="hidden" name="calculatedFinalPrice" id="promoFormFinalPrice" value="<%= finalPrice != null ? finalPrice.doubleValue() : 0.0 %>">
                     <div class="input-group">
@@ -364,7 +365,7 @@
                     <button type="submit" name="pay" class="btn btn-secondary">Tiến hành thanh toán</button>
                 </form>
                 <p style="margin-top: 20px;">
-                    <a href="index.jsp" class="btn btn-outline">
+                    <a href="home" class="btn btn-outline">
                         <i class="fas fa-home"></i> Quay lại trang chủ
                     </a>
                 </p>
@@ -428,12 +429,11 @@
                 // Calculate total price before discount
                 var subtotal = seatTotal + comboTotal;
                 
-                // If there's a promotion code, apply a discount
-                var promoInput = document.getElementById('promoCodeInput');
-                var promoCode = promoInput ? promoInput.value.trim() : '';
+                // If there's a promotion code that was already applied from the server side,
+                // we respect that discount (don't apply client-side discount for promo code input field)
                 var discountedTotal = subtotal;
                 
-                if (promoCode.length > 0 || appliedPromo.length > 0) {
+                if (appliedPromo.length > 0) {
                     // Simulated 10% discount - in a real app, you'd get the actual discount rate
                     discountedTotal = subtotal * 0.9;
                 }
@@ -503,12 +503,10 @@
                     });
                 }
                 
-                // Setup promo code input
+                // Setup promo code input - Remove the input event listener since we want the price to update only when submitting
                 var promoInput = document.getElementById('promoCodeInput');
                 if (promoInput) {
-                    promoInput.addEventListener('input', function() {
-                        updateDisplayPrice();
-                    });
+                    // No input listener - price only updates when user clicks submit
                 }
                 
                 // Add seat count display
