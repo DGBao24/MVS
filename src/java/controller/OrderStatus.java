@@ -73,9 +73,22 @@ public class OrderStatus extends HttpServlet {
                     order.setStatus("Completed");
                     transSuccess = true;
                 } else {
-                     order.setStatus("Failed");
+                    order.setStatus("Failed");
+                    transSuccess = false;
                 }
                 bookingDAO.updateOrderStatus(order);
+                
+                // Clear booking session data
+                HttpSession session = request.getSession();
+                session.removeAttribute("selectedSeats");
+                session.removeAttribute("selectedShowtime");
+                session.removeAttribute("totalPrice");
+                session.removeAttribute("basePrice");
+                session.removeAttribute("finalPrice");
+                session.removeAttribute("Order");
+                session.removeAttribute("comboQuantities");
+                session.removeAttribute("appliedPromo");
+                
                 request.setAttribute("transResult", transSuccess);
                 request.getRequestDispatcher("paymentResult.jsp").forward(request, response);
             } else {

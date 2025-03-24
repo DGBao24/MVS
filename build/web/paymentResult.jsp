@@ -5,7 +5,7 @@
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@page import="entity.Account, entity.Movie, entity.Combo, java.sql.Timestamp, java.text.NumberFormat, java.util.Locale, java.text.SimpleDateFormat, java.util.List, java.util.ArrayList" %>
+<%@page import="entity.Order, java.sql.Timestamp, java.text.NumberFormat, java.util.Locale, java.text.SimpleDateFormat, java.util.List, java.util.ArrayList" %>
 <!DOCTYPE html>
 <html>
     <head>
@@ -91,15 +91,16 @@
             }
         </style>
     </head>
+    
     <body class="bg-light">
-        <%boolean paymentSuccess = (Boolean)request.getAttribute("transResult"); %>
+        <%boolean paymentSuccess = (Boolean)request.getAttribute("transResult");
+        %>
         <div class="result-container">
             <div class="header text-center">
                 <h2>Payment Result</h2>
             </div>
-            
-            <!-- Payment Status -->
-            <div class="text-center mb-4">
+            <form action="paymentstatus" method="POST">
+                 <div class="text-center mb-4">
                 <% if (paymentSuccess) { %>
                     <div class="success-icon">
                         <i class="bi bi-check-circle-fill"></i>
@@ -131,14 +132,17 @@
                     </div>
                 </div>
             </div>
-            
+                 
             <!-- Actions -->
             <div class="text-center mt-4">
-                <a href="index.jsp" class="btn btn-primary">Return to Home</a>
+                <a href="home" class="btn btn-primary">Return to Home</a>
                 <% if (!paymentSuccess) { %>
                     <a href="payment.jsp" class="btn btn-outline-primary">Try Again</a>
                 <% } %>
             </div>
+            </form>
+            <!-- Payment Status -->
+           
         
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">

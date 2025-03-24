@@ -72,7 +72,10 @@ public class OrderController extends HttpServlet {
             String orderType = "other";
             String bankCode = "";
             long amount = (long) (totalPrice * 100);
-            String vnp_TxnRef = Config.getRandomNumber(8); 
+            
+            // Get the Order from session and use its ID for vnp_TxnRef
+            Order lastOrder = (Order) session.getAttribute("Order");
+            String vnp_TxnRef = String.valueOf(lastOrder.getOrderID());
             String vnp_IpAddr = Config.getIpAddress(request);
 
             String vnp_TmnCode = Config.vnp_TmnCode;

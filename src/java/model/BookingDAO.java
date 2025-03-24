@@ -673,9 +673,7 @@ public class BookingDAO extends DBConnection {
 }
 
       public boolean updateOrderStatus(Order order) {
-        String sql = "UPDATE [dbo].[Order]\n"
-                + "   SET [Status] = ?\n"
-                + " WHERE OrderID = ?";
+        String sql = "UPDATE [dbo].[Order] SET [Status] = ? WHERE OrderID = ?";
         try {
             PreparedStatement st = conn.prepareStatement(sql);
             st.setString(1, order.getStatus());
@@ -686,7 +684,31 @@ public class BookingDAO extends DBConnection {
         }
         return false;
     }
-    
+      public List<Ticket> getTicketsByShowtime(int showtimeID) {
+        List<Ticket> tickets = new ArrayList<>();
+        String sql = "SELECT * FROM Ticket WHERE ShowTimeID = ?";
+        
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setInt(1, showtimeID);
+            ResultSet rs = ps.executeQuery();
+            
+            while (rs.next()) {
+                Ticket ticket = new Ticket(
+                    rs.getInt("TicketID"),
+                    rs.getInt("SeatID"),
+                    rs.getInt("ShowTimeID"),
+                    rs.getInt("OrderID"),
+                    rs.getBoolean("Status")
+                );
+                tickets.add(ticket);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(BookingDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        return tickets;
+    }
     public static void main(String[] args) {
         BookingDAO dao = new BookingDAO();
         String StartTime = "2025-03-23 00:00:00.000";
