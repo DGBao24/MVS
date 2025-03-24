@@ -101,7 +101,17 @@ public class SeatController extends HttpServlet {
             seats = sdao.getAllSeats();
         } else {
             // Nếu chọn một Room cụ thể, lấy ghế của phòng đó
-            seats = sdao.getSeatsByRoom(RoomID);
+            
+            
+            // Lấy showtime parameter nếu có
+            String showtimeID = request.getParameter("ShowtimeID");
+            if (showtimeID != null && !showtimeID.isEmpty()) {
+                // Nếu có showtimeID, lấy trạng thái ghế cho lịch chiếu cụ thể
+                seats = sdao.getSeatsByRoomAndShowtime(RoomID, Integer.parseInt(showtimeID));
+            } else {
+                // Nếu không có showtimeID, chỉ lấy ghế của phòng
+                seats = sdao.getSeatsByRoom(RoomID);
+            }
         }
 
         List<Room> rooms = dao.getAllCinemaRooms();

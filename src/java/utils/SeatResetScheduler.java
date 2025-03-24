@@ -86,17 +86,18 @@ public class SeatResetScheduler {
                 List<Ticket> tickets = bookingDAO.getTicketsByShowtime(showtime.getShowtimeID());
                 
                 for (Ticket ticket : tickets) {
-                    // Reset each seat that was booked for this showtime
-                    Seat seat = bookingDAO.getSeatByID(ticket.getSeatID());
-                    if (seat != null && !"Available".equals(seat.getStatus())) {
-                        bookingDAO.updateSeatEndTime(seat.getSeatID());
-                        LOGGER.info("Reset seat " + seat.getSeatID() + " for showtime " + showtime.getShowtimeID());
+                    // Update ticket status to completed (if needed)
+                    // No need to update seat status directly since it's now derived from tickets
+                    if (!ticket.isStatus()) {
+                        // Update ticket status logic if needed
+                        // For now, we're not updating anything since seats status is determined by tickets
+                        LOGGER.info("Processed ticket " + ticket.getTicketID() + " for showtime " + showtime.getShowtimeID());
                     }
                 }
                 
-                LOGGER.info("Completed seat reset for showtime " + showtime.getShowtimeID());
+                LOGGER.info("Completed processing for showtime " + showtime.getShowtimeID());
             } catch (Exception e) {
-                LOGGER.log(Level.SEVERE, "Error resetting seats for showtime " + showtime.getShowtimeID(), e);
+                LOGGER.log(Level.SEVERE, "Error processing tickets for showtime " + showtime.getShowtimeID(), e);
             }
         }
     }
