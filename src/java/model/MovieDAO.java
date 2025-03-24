@@ -152,7 +152,7 @@ public class MovieDAO extends DBConnection {
         List<Movie> list = new ArrayList<>();
         String query = "SELECT m.MovieID,m.MovieName,m.Duration,m.Genre,m.Director,m.ReleaseDate\n"
                 + "      ,m.Description,m.Rate,i.ImagePath,m.TrailerURL,m.BasePrice,m.Status\n"
-                + "  FROM [dbo].[Movie] m join Image i on m.MoviePoster = i.ImageID where m.Status like 'NowShowing'";
+                + "  FROM [dbo].[Movie] m join Image i on m.MoviePoster = i.ImageID where m.Status like 'NowShowing' ORDER BY m.MovieID DESC";
         try (PreparedStatement ps = conn.prepareStatement(query); ResultSet rs = ps.executeQuery()) {
             if (!rs.isBeforeFirst()) {
                 System.out.println("Không có dữ liệu trong bảng Movie!");
@@ -221,7 +221,7 @@ public class MovieDAO extends DBConnection {
         List<Movie> list = new ArrayList<>();
         String query = "SELECT m.MovieID,m.MovieName,m.Duration,m.Genre,m.Director,m.ReleaseDate\n"
                 + "      ,m.Description,m.Rate,i.ImagePath,m.TrailerURL,m.BasePrice,m.Status\n"
-                + "  FROM [dbo].[Movie] m join Image i on m.MoviePoster = i.ImageID where m.Status like 'UpcomingMovie'";
+                + "  FROM [dbo].[Movie] m join Image i on m.MoviePoster = i.ImageID where m.Status like 'UpcomingMovie' ORDER BY m.MovieID DESC";
         try (PreparedStatement ps = conn.prepareStatement(query); ResultSet rs = ps.executeQuery()) {
             if (!rs.isBeforeFirst()) {
                 System.out.println("Không có dữ liệu trong bảng Movie!");

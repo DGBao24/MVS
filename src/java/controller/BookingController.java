@@ -19,6 +19,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 @WebServlet(name = "BookingController", urlPatterns = {"/book"})
 public class BookingController extends HttpServlet {
@@ -151,20 +155,65 @@ public class BookingController extends HttpServlet {
                                     } else {
                                         double totalPrice = 0;
                                         double basePrice = 0;
+                                        // Create maps to store individual seat factors and seat IDs by type
+                                        Map<String, Double> seatTypeFactors = new HashMap<>();
+                                        Map<String, List<Integer>> seatsByType = new HashMap<>();
+                                        double vipFactor = 0.0;
+                                        double standardFactor = 0.0;
+                                        int vipCount = 0;
+                                        int standardCount = 0;
 
                                         while (ticketRs.next()) {
                                             basePrice = ticketRs.getDouble("BasePrice");
                                             double seatFactor = ticketRs.getDouble("SeatFactor");
                                             double roomFactor = ticketRs.getDouble("RoomFactor");
-
-                                            totalPrice += (basePrice * seatFactor * roomFactor);
-
+                                            String seatType = ticketRs.getString("SeatType");
+                                            int seatID = ticketRs.getInt("SeatID");
                                             
-                                            // Save factors for later use in confirmation page
-                                            session.setAttribute("seatFactor", seatFactor);
+                                            // Store the seat factor for each seat type
+                                            seatTypeFactors.put(seatType, seatFactor);
+                                            
+                                            // Group seat IDs by type
+                                            if (!seatsByType.containsKey(seatType)) {
+                                                seatsByType.put(seatType, new ArrayList<>());
+                                            }
+                                            seatsByType.get(seatType).add(seatID);
+                                            
+                                            // Track counts and factors for VIP and Standard seats
+                                            if ("VIP".equals(seatType)) {
+                                                vipFactor = seatFactor;
+                                                vipCount++;
+                                            } else if ("Standard".equals(seatType)) {
+                                                standardFactor = seatFactor;
+                                                standardCount++;
+                                            }
+                                            
+                                            // Calculate individual price for this seat
+                                            totalPrice += (basePrice * seatFactor * roomFactor);
+                                            
+                                            // Save room factor for later use in confirmation page
                                             session.setAttribute("roomFactor", roomFactor);
-
                                         }
+                                        
+                                        // Save seat type specific data for pricing details
+                                        session.setAttribute("seatTypeFactors", seatTypeFactors);
+                                        session.setAttribute("seatsByType", seatsByType);
+                                        session.setAttribute("vipFactor", vipFactor);
+                                        session.setAttribute("standardFactor", standardFactor);
+                                        session.setAttribute("vipCount", vipCount);
+                                        session.setAttribute("standardCount", standardCount);
+                                        
+                                        // For backward compatibility
+                                        if (vipCount > 0 && standardCount == 0) {
+                                            session.setAttribute("seatFactor", vipFactor);
+                                        } else if (standardCount > 0 && vipCount == 0) {
+                                            session.setAttribute("seatFactor", standardFactor);
+                                        } else {
+                                            // If mixed seats, use the VIP factor for display purpose
+                                            // The actual calculation will be done properly with individual factors
+                                            session.setAttribute("seatFactor", vipFactor > 0 ? vipFactor : standardFactor);
+                                        }
+
                                         session.setAttribute("selectedShowtime", startTime);
                                         session.setAttribute("selectedSeats", seatIDs);
                                         request.setAttribute("ticketDetails", ticketRs);
