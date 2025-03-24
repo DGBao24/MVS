@@ -455,7 +455,6 @@ public class BookingDAO extends DBConnection {
         return null;
     }
 
-
     public int insertOrder(int accountId, Timestamp orderDate, String status) {
         int orderId = -1;
         String sql = "INSERT INTO [dbo].[Order] (AccountID, OrderDate,TotalAmount,SeatQuantity,  Status) "
@@ -465,7 +464,6 @@ public class BookingDAO extends DBConnection {
 
             ps.setInt(1, accountId);
             ps.setTimestamp(2, orderDate);
-
 
             ps.setString(3, status);
 
@@ -535,9 +533,7 @@ public class BookingDAO extends DBConnection {
                 order.setSeatQuantity(rs.getInt("SeatQuantity"));
                 order.setComboQuantity(rs.getInt("ComboQuantity"));
                 order.setPromotionID(rs.getInt("PromotionID"));
-
                 order.setStatus(rs.getString("Status"));
-
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -645,7 +641,6 @@ public class BookingDAO extends DBConnection {
         }
     }
     
-
     public int updateOrderPrice(int orderId, double totalAmount) {
         String sql = "UPDATE [dbo].[Order] " +
                      "SET ToTalAmount = ? " +
@@ -661,7 +656,6 @@ public class BookingDAO extends DBConnection {
         }
     }
     
-
     public boolean checkOrderComboExists(int orderID) {
     String query = "SELECT COUNT(*) FROM OrderCombo WHERE OrderID = ?";
     try (
@@ -679,9 +673,7 @@ public class BookingDAO extends DBConnection {
 }
 
       public boolean updateOrderStatus(Order order) {
-        String sql = "UPDATE [dbo].[Order]\n"
-                + "   SET [Status] = ?\n"
-                + " WHERE OrderID = ?";
+        String sql = "UPDATE [dbo].[Order] SET [Status] = ? WHERE OrderID = ?";
         try {
             PreparedStatement st = conn.prepareStatement(sql);
             st.setString(1, order.getStatus());
@@ -692,31 +684,31 @@ public class BookingDAO extends DBConnection {
         }
         return false;
     }
-      
-    public void deleteTicket(int oid){
-        String sql = "Delete Ticket where OrderID = " + oid;
-        Statement state;
+      public List<Ticket> getTicketsByShowtime(int showtimeID) {
+        List<Ticket> tickets = new ArrayList<>();
+        String sql = "SELECT * FROM Ticket WHERE ShowTimeID = ?";
+        
         try {
-            state = conn.createStatement();
-        state.execute(sql);
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setInt(1, showtimeID);
+            ResultSet rs = ps.executeQuery();
+            
+            while (rs.next()) {
+                Ticket ticket = new Ticket(
+                    rs.getInt("TicketID"),
+                    rs.getInt("SeatID"),
+                    rs.getInt("ShowTimeID"),
+                    rs.getInt("OrderID"),
+                    rs.getBoolean("Status")
+                );
+                tickets.add(ticket);
+            }
         } catch (SQLException ex) {
             Logger.getLogger(BookingDAO.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }  
-      
-    public void deleteOrderCombo(int oid){
-        String sql = "Delete OrderCombo where OrderID = " + oid;
-        Statement state;
-        try {
-            state = conn.createStatement();
-        state.execute(sql);
-        } catch (SQLException ex) {
-            Logger.getLogger(BookingDAO.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }  
-    
-
-    
+        
+        return tickets;
+    }
     public static void main(String[] args) {
         BookingDAO dao = new BookingDAO();
         String StartTime = "2025-03-23 00:00:00.000";
@@ -735,5 +727,5 @@ public class BookingDAO extends DBConnection {
 //    Order order = dao.getLatestOrder();
 //        System.out.println(order);
     }
-
+    
 }
