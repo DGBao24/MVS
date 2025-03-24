@@ -1,0 +1,81 @@
+/*
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/ClientSide/css.css to edit this template
+*/
+/* 
+    Created on : Mar 25, 2025, 1:42:20 AM
+    Author     : Nhat Anh
+*/
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
+}
+
+/* Wrapper */
+#wrapper {
+    display: flex;
+}
+
+/* Content Wrapper */
+#content-wrapper {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Content */
+#content {
+    padding: 20px;
+    width: 100%;
+}
+
+/* Chart Container */
+.chart-container {
+    width: 80%;
+    margin: auto;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Filter Section */
+.filter-section {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.filter-section select {
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    width: 200px;
+}
+
+/* Revenue Table */
+.revenue-table {
+    width: 80%;
+    margin: auto;
+    margin-top: 20px;
+}
+
+.revenue-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.revenue-table th, .revenue-table td {
+    text-align: center;
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+.revenue-table th {
+    background-color: #343a40;
+    color: white;
+}
+
+.revenue-table tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
