@@ -284,6 +284,36 @@
                     <span class="info-label">Giá vé ban đầu:</span>
                     <span><%= (basePrice != null) ? currencyFormat.format(basePrice) : "Không có" %></span>
                 </div>
+                
+                <% 
+                Integer vipCount = (Integer) session.getAttribute("vipCount");
+                Integer standardCount = (Integer) session.getAttribute("standardCount");
+                Double vipFactor = (Double) session.getAttribute("vipFactor");
+                Double standardFactor = (Double) session.getAttribute("standardFactor");
+                Double roomFactor = (Double) session.getAttribute("roomFactor");
+                
+                if (vipCount != null && vipCount > 0) { 
+                %>
+                <div class="info-item">
+                    <span class="info-label">Ghế VIP:</span>
+                    <span><%= vipCount %> ghế (x<%= vipFactor %>)</span>
+                </div>
+                <% } %>
+                
+                <% if (standardCount != null && standardCount > 0) { %>
+                <div class="info-item">
+                    <span class="info-label">Ghế Thường:</span>
+                    <span><%= standardCount %> ghế (x<%= standardFactor %>)</span>
+                </div>
+                <% } %>
+                
+                <% if (roomFactor != null) { %>
+                <div class="info-item">
+                    <span class="info-label">Hệ số phòng:</span>
+                    <span>x<%= roomFactor %></span>
+                </div>
+                <% } %>
+                
                 <div class="info-item">
                     <span class="info-label">Giá cuối cùng:</span>
                     <span id="finalPriceDisplay"><%= (finalPrice != null) ? currencyFormat.format(finalPrice) : "Không có" %></span>
@@ -343,6 +373,7 @@
 
             <div class="card">
                 <h3>Mã giảm giá</h3>
+                <!-- This form only applies the promotion when the submit button is clicked, not when entering text -->
                 <form id="promoForm" action="combo-promotion" method="post">
                     <input type="hidden" name="calculatedFinalPrice" id="promoFormFinalPrice" value="<%= finalPrice != null ? finalPrice.doubleValue() : 0.0 %>">
                     <div class="input-group">
@@ -364,7 +395,7 @@
                     <button type="submit" name="pay" class="btn btn-secondary">Tiến hành thanh toán</button>
                 </form>
                 <p style="margin-top: 20px;">
-                    <a href="index.jsp" class="btn btn-outline">
+                    <a href="home" class="btn btn-outline">
                         <i class="fas fa-home"></i> Quay lại trang chủ
                     </a>
                 </p>
@@ -378,6 +409,10 @@
         <input type="hidden" id="seatCountField" value="<%= session.getAttribute("selectedSeats") != null ? ((String[])session.getAttribute("selectedSeats")).length : 0 %>">
         <input type="hidden" id="roomFactorField" value="<%= session.getAttribute("roomFactor") != null ? session.getAttribute("roomFactor") : 1.0 %>">
         <input type="hidden" id="seatFactorField" value="<%= session.getAttribute("seatFactor") != null ? session.getAttribute("seatFactor") : 1.0 %>">
+        <input type="hidden" id="vipFactorField" value="<%= session.getAttribute("vipFactor") != null ? session.getAttribute("vipFactor") : 0.0 %>">
+        <input type="hidden" id="standardFactorField" value="<%= session.getAttribute("standardFactor") != null ? session.getAttribute("standardFactor") : 0.0 %>">
+        <input type="hidden" id="vipCountField" value="<%= session.getAttribute("vipCount") != null ? session.getAttribute("vipCount") : 0 %>">
+        <input type="hidden" id="standardCountField" value="<%= session.getAttribute("standardCount") != null ? session.getAttribute("standardCount") : 0 %>">
 
         <script type="text/javascript">
             /* Store initial values */
@@ -387,6 +422,10 @@
             var seatCount = parseInt(document.getElementById('seatCountField').value);
             var roomFactor = parseFloat(document.getElementById('roomFactorField').value) || 1.0;
             var seatFactor = parseFloat(document.getElementById('seatFactorField').value) || 1.0;
+            var vipFactor = parseFloat(document.getElementById('vipFactorField').value) || 0.0;
+            var standardFactor = parseFloat(document.getElementById('standardFactorField').value) || 0.0;
+            var vipCount = parseInt(document.getElementById('vipCountField').value) || 0;
+            var standardCount = parseInt(document.getElementById('standardCountField').value) || 0;
             
             /* Format currency function */
             function formatCurrency(amount) {
@@ -416,11 +455,25 @@
             
             /* Update display price - considers base price, seat count, combos, and promo discount */
             function updateDisplayPrice() {
-                // Apply room and seat factors to the base price
-                var adjustedBasePrice = basePrice * roomFactor * seatFactor;
+                // Calculate seat total with proper factors for each seat type
+                var seatTotal = 0;
                 
-                // Calculate the seat price total (adjustedBasePrice * number of seats)
-                var seatTotal = adjustedBasePrice * seatCount;
+                // If we have both VIP and Standard seats, calculate them separately
+                if (vipCount > 0 || standardCount > 0) {
+                    // Calculate VIP seats price
+                    if (vipCount > 0 && vipFactor > 0) {
+                        seatTotal += (basePrice * roomFactor * vipFactor * vipCount);
+                    }
+                    
+                    // Calculate Standard seats price
+                    if (standardCount > 0 && standardFactor > 0) {
+                        seatTotal += (basePrice * roomFactor * standardFactor * standardCount);
+                    }
+                } else {
+                    // Fallback to old method if seat type information is missing
+                    var adjustedBasePrice = basePrice * roomFactor * seatFactor;
+                    seatTotal = adjustedBasePrice * seatCount;
+                }
                 
                 // Get combo total
                 var comboTotal = calculateTotal();
@@ -428,12 +481,11 @@
                 // Calculate total price before discount
                 var subtotal = seatTotal + comboTotal;
                 
-                // If there's a promotion code, apply a discount
-                var promoInput = document.getElementById('promoCodeInput');
-                var promoCode = promoInput ? promoInput.value.trim() : '';
+                // If there's a promotion code that was already applied from the server side,
+                // we respect that discount (don't apply client-side discount for promo code input field)
                 var discountedTotal = subtotal;
                 
-                if (promoCode.length > 0 || appliedPromo.length > 0) {
+                if (appliedPromo.length > 0) {
                     // Simulated 10% discount - in a real app, you'd get the actual discount rate
                     discountedTotal = subtotal * 0.9;
                 }
@@ -503,12 +555,10 @@
                     });
                 }
                 
-                // Setup promo code input
+                // Setup promo code input - Remove the input event listener since we want the price to update only when submitting
                 var promoInput = document.getElementById('promoCodeInput');
                 if (promoInput) {
-                    promoInput.addEventListener('input', function() {
-                        updateDisplayPrice();
-                    });
+                    // No input listener - price only updates when user clicks submit
                 }
                 
                 // Add seat count display
