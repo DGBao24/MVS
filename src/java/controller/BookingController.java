@@ -108,7 +108,9 @@ public class BookingController extends HttpServlet {
                     } else {
                         try {
                             Timestamp orderDate = new Timestamp(System.currentTimeMillis());
-                            dao.insertOrder(accountId, orderDate, 1);
+
+                            dao.insertOrder(accountId, orderDate, "Processing");
+
                             Order lastOrder = dao.getLatestOrder();
                             for (String seat : seatIDs) {
                                 int sid = Integer.parseInt(seat);
@@ -155,6 +157,12 @@ public class BookingController extends HttpServlet {
                                             double roomFactor = ticketRs.getDouble("RoomFactor");
 
                                             totalPrice += (basePrice * seatFactor * roomFactor);
+
+                                            
+                                            // Save factors for later use in confirmation page
+                                            session.setAttribute("seatFactor", seatFactor);
+                                            session.setAttribute("roomFactor", roomFactor);
+
                                         }
                                         session.setAttribute("selectedShowtime", startTime);
                                         session.setAttribute("selectedSeats", seatIDs);

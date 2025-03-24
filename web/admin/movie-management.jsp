@@ -110,7 +110,7 @@
                                                         <select class="form-control" name="Status" id="Status" required>
                                                             <option value="NowShowing">NowShowing</option>
                                                             <option value="UpcomingMovie">UpcomingMovie</option>
-                                                            <option value="EndOfShowing">EndOfShowing</option>
+                                                            <option value="ShownMovie">ShownMovie</option>
                                                         </select>
                                                     </div>
                                                     <button type="submit" class="btn btn-primary">Add Movie</button>

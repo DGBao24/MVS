@@ -20,10 +20,11 @@ public class Order {
     private int SeatQuantity;
     private int ComboQuantity;
     private int PromotionID;
-    private boolean Status;
+    private String Status;
     
 
-    public Order(int OrderID, int AccountID, Timestamp OrderDate, float TotalAmount, int SeatQuantity, int ComboQuantity, int PromotionID, boolean Status) {
+    public Order(int OrderID, int AccountID, Timestamp OrderDate, float TotalAmount, int SeatQuantity, int ComboQuantity, int PromotionID, String Status) {
+
         this.OrderID = OrderID;
         this.AccountID = AccountID;
         this.OrderDate = OrderDate;
@@ -34,7 +35,9 @@ public class Order {
         this.Status = Status;
     }
 
-    public Order(int AccountID, Timestamp OrderDate, float TotalAmount, int SeatQuantity, boolean Status) {
+
+    public Order(int AccountID, Timestamp OrderDate, float TotalAmount, int SeatQuantity, String Status) {
+
         this.AccountID = AccountID;
         this.OrderDate = OrderDate;
         this.TotalAmount = TotalAmount;
@@ -74,7 +77,8 @@ public class Order {
         return PromotionID;
     }
 
-    public boolean isStatus() {
+
+    public String getStatus() {
         return Status;
     }
 
@@ -106,7 +110,8 @@ public class Order {
         this.PromotionID = PromotionID;
     }
 
-    public void setStatus(boolean Status) {
+
+    public void setStatus(String Status) {
         this.Status = Status;
     }
 

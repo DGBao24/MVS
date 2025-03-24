@@ -455,7 +455,8 @@ public class BookingDAO extends DBConnection {
         return null;
     }
 
-    public int insertOrder(int accountId, Timestamp orderDate, int status) {
+
+    public int insertOrder(int accountId, Timestamp orderDate, String status) {
         int orderId = -1;
         String sql = "INSERT INTO [dbo].[Order] (AccountID, OrderDate,TotalAmount,SeatQuantity,  Status) "
                 + "VALUES (?, ?,0,0,?)";
@@ -465,7 +466,8 @@ public class BookingDAO extends DBConnection {
             ps.setInt(1, accountId);
             ps.setTimestamp(2, orderDate);
 
-            ps.setInt(3, status);
+
+            ps.setString(3, status);
 
             int affectedRows = ps.executeUpdate();
             if (affectedRows > 0) {
@@ -533,7 +535,9 @@ public class BookingDAO extends DBConnection {
                 order.setSeatQuantity(rs.getInt("SeatQuantity"));
                 order.setComboQuantity(rs.getInt("ComboQuantity"));
                 order.setPromotionID(rs.getInt("PromotionID"));
-                order.setStatus(rs.getBoolean("Status"));
+
+                order.setStatus(rs.getString("Status"));
+
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -641,6 +645,23 @@ public class BookingDAO extends DBConnection {
         }
     }
     
+
+    public int updateOrderPrice(int orderId, double totalAmount) {
+        String sql = "UPDATE [dbo].[Order] " +
+                     "SET ToTalAmount = ? " +
+                     "WHERE OrderID = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setDouble(1, totalAmount);
+            ps.setInt(2, orderId);
+
+            return ps.executeUpdate(); // Trả về số dòng bị ảnh hưởng
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return -1; // Trả về -1 nếu có lỗi
+        }
+    }
+    
+
     public boolean checkOrderComboExists(int orderID) {
     String query = "SELECT COUNT(*) FROM OrderCombo WHERE OrderID = ?";
     try (
@@ -656,6 +677,44 @@ public class BookingDAO extends DBConnection {
     }
     return false;
 }
+
+      public boolean updateOrderStatus(Order order) {
+        String sql = "UPDATE [dbo].[Order]\n"
+                + "   SET [Status] = ?\n"
+                + " WHERE OrderID = ?";
+        try {
+            PreparedStatement st = conn.prepareStatement(sql);
+            st.setString(1, order.getStatus());
+            st.setInt(2, order.getOrderID());
+            return st.executeUpdate() > 0;
+        } catch (SQLException ex) {
+           ex.printStackTrace();
+        }
+        return false;
+    }
+      
+    public void deleteTicket(int oid){
+        String sql = "Delete Ticket where OrderID = " + oid;
+        Statement state;
+        try {
+            state = conn.createStatement();
+        state.execute(sql);
+        } catch (SQLException ex) {
+            Logger.getLogger(BookingDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }  
+      
+    public void deleteOrderCombo(int oid){
+        String sql = "Delete OrderCombo where OrderID = " + oid;
+        Statement state;
+        try {
+            state = conn.createStatement();
+        state.execute(sql);
+        } catch (SQLException ex) {
+            Logger.getLogger(BookingDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }  
+    
 
     
     public static void main(String[] args) {
@@ -676,4 +735,5 @@ public class BookingDAO extends DBConnection {
 //    Order order = dao.getLatestOrder();
 //        System.out.println(order);
     }
+
 }

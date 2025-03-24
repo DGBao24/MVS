@@ -73,6 +73,21 @@ public class ComboPromotionController extends HttpServlet {
                 LOGGER.log(Level.WARNING, "Lỗi chuyển đổi ComboQuantity", e);
             }
 
+
+            String calculatedFinalPriceStr = request.getParameter("calculatedFinalPrice");
+            if (calculatedFinalPriceStr != null && !calculatedFinalPriceStr.isEmpty()) {
+                try {
+                    Double calculatedFinalPrice = Double.parseDouble(calculatedFinalPriceStr);
+                    if (calculatedFinalPrice > 0) {
+                        totalPrice = calculatedFinalPrice;
+                        LOGGER.log(Level.INFO, "Using calculated final price from client: {0}", totalPrice);
+                    }
+                } catch (NumberFormatException e) {
+                    LOGGER.log(Level.WARNING, "Error parsing calculatedFinalPrice: {0}", e.getMessage());
+                }
+            }
+
+
             if (lastOrder == null) {
                 request.setAttribute("mess", "Lỗi: Không tìm thấy đơn hàng!");
                 request.getRequestDispatcher("ticket-confirmation.jsp").forward(request, response);
@@ -122,8 +137,12 @@ public class ComboPromotionController extends HttpServlet {
             session.setAttribute("comboQuantities", comboQuantities);
             session.setAttribute("finalPrice", totalPrice);
 
-            if (confirmCombo != null) {
-                // Xử lý xác nhận combo (Giữ nguyên logic cũ)
+
+           if (confirmCombo != null) { // Xử lý xác nhận combo
+                
+
+                boolean isOrderComboExists = dao.checkOrderComboExists(lastOrder.getOrderID()); // Kiểm tra đơn hàng đã có combo chưa
+
 
                 for (String param : request.getParameterMap().keySet()) {
                     if (param.startsWith("ComboQuantity_")) {
@@ -135,6 +154,17 @@ public class ComboPromotionController extends HttpServlet {
                             selectedCombos.add(combo);
                             comboQuantities.put(comboID, quantity);
                             totalPrice += combo.getPrice() * quantity;
+
+
+                            if (isOrderComboExists) {
+                                OrderCombo lastOC = dao.getLatestOrderCombo();
+                                // Nếu đã tồn tại, thực hiện cập nhật
+                                dao.updateOrderCombo(lastOC.getOrderComboID(),lastOC.getOrderID() , comboID, quantity, combo.getPrice() * quantity);
+                            } else {
+                                // Nếu chưa tồn tại, thực hiện insert
+                                dao.insertOrderCombo(lastOrder.getOrderID(), comboID, quantity, combo.getPrice() * quantity);
+                            }
+
                         }
                     }
                 }
@@ -150,14 +180,19 @@ public class ComboPromotionController extends HttpServlet {
                 if (appliedPromo != null) {
                     totalPrice = basePrice;
                     session.removeAttribute("appliedPromo");
+
+                    session.removeAttribute("promotionID"); // Also remove the stored promotion ID
+
                 }
 
                 if (promoCode != null && !promoCode.trim().isEmpty()) {
                     Promotion pro = dao.validatePromotion(promoCode);
                     if (pro != null) {
                         double discountRate = pro.getDiscountPercent();
-                        totalPrice -= totalPrice * discountRate;
+                        totalPrice -= totalPrice * discountRate / 100;
                         session.setAttribute("appliedPromo", promoCode);
+                        session.setAttribute("promotionID", pro.getPromotionID()); // Store promotion ID in session
+
                         request.setAttribute("mess", "Mã giảm giá đã được áp dụng!");
                     } else {
                         request.setAttribute("mess", "Mã giảm giá không hợp lệ!");
@@ -169,19 +204,22 @@ public class ComboPromotionController extends HttpServlet {
 
             if (pay != null) {
                 int seatQuantity = seatIDs.size();
-                if (!selectedCombos.isEmpty() && (promoCode == null || promoCode.isEmpty())) {
-                    dao.updateComboOrder(lastOrder.getOrderID(), totalPrice, seatQuantity, selectedCombos.size());
-                } else if (promoCode != null && !promoCode.isEmpty() && selectedCombos.isEmpty()) {
-                    Promotion pro = dao.validatePromotion(promoCode);
-                    int promotionId = pro.getPromotionID();
-                    dao.updatePromotionOrder(lastOrder.getOrderID(), totalPrice, seatQuantity, promotionId);
-                } else if (!selectedCombos.isEmpty() && promoCode != null && !promoCode.isEmpty()) {
-                    Promotion pro = dao.validatePromotion(promoCode);
-                    int promotionId = pro.getPromotionID();
-                    dao.updateComboAndPromotion(lastOrder.getOrderID(), totalPrice, seatQuantity, selectedCombos.size(), promotionId);
-                }
 
-                response.sendRedirect("payment.jsp");
+                Integer promotionID = (Integer) session.getAttribute("promotionID");
+                
+                if (!selectedCombos.isEmpty() && promotionID == null) {
+                    dao.updateComboOrder(lastOrder.getOrderID(), totalPrice, seatQuantity, selectedCombos.size());
+                } else if (promotionID != null && selectedCombos.isEmpty()) {
+                    dao.updatePromotionOrder(lastOrder.getOrderID(), totalPrice, seatQuantity, promotionID);
+                } else if (!selectedCombos.isEmpty() && promotionID != null) {
+                    dao.updateComboAndPromotion(lastOrder.getOrderID(), totalPrice, seatQuantity, selectedCombos.size(), promotionID);
+                } else {
+                    // No combos or promotions, just update the order with the new price
+                    dao.updateOrderPrice(lastOrder.getOrderID(), totalPrice);
+                }
+                 session.setAttribute("finalPrice", totalPrice);
+                request.getRequestDispatcher("/payment.jsp").forward(request, response);
+
             } else {
                 request.getRequestDispatcher("/ticket-confirmation.jsp").forward(request, response);
             }
