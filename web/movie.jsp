@@ -115,7 +115,7 @@
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-dark">
                                     <li><a class="dropdown-item" href="Profile.jsp">Profile</a></li>
-                                    <li><a class="dropdown-item" href="MyBookings">My Bookings</a></li>
+                                    <li><a class="dropdown-item" href="mybookings">My Bookings</a></li>
                                         <% if (isAdmin || isManager) { %>
                                     <li><hr class="dropdown-divider"></li>
                                     <li><a class="dropdown-item" href="admin">Admin Dashboard</a></li>
