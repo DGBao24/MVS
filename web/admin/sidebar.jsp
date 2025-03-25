@@ -38,6 +38,13 @@
         </a>
     </li>
 
+    <!-- Nav Item - Blog Management -->
+    <li class="nav-item">
+        <a class="nav-link" href="${pageContext.request.contextPath}/admin/blog">
+            <span>Blog Management</span>
+        </a>
+    </li>
+
     <!-- Nav Item - Showtime Management -->
     <li class="nav-item">
         <a class="nav-link" href="${pageContext.request.contextPath}/admin/showtime?service=listAll">

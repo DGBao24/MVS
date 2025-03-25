@@ -105,6 +105,7 @@
                         <li class="nav-item"><a class="nav-link" href="home">HOME</a></li>
                         <li class="nav-item"><a class="nav-link" href="MovieController?service=list">MOVIES</a></li>
                         <li class="nav-item"><a class="nav-link" href="CimemaController">CINEMAS</a></li>
+                        <li class="nav-item"><a class="nav-link" href="BlogController?action=list">BLOGS</a></li>
                         <li class="nav-item"><a class="nav-link active" href="PromotionController?action=publicList">PROMOTIONS</a></li>
                     </ul>
                     <div class="navbar-nav">
