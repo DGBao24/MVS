@@ -367,8 +367,46 @@ public class DAOAccount extends DBConnection {
     return customerList;
 }
 
-    
-    
+    public void updateLoyaltyPointsAndLevel(int accountId, double totalAmount) {
+        String sql = "UPDATE Account SET LoyaltyPoint = LoyaltyPoint + ?, MembershipLevel = ? WHERE AccountID = ?";
+        try {
+            // Calculate points (1 point per 1000 in total amount)
+            int pointsToAdd = (int) (totalAmount / 1000);
+            
+            // Get current points
+            String getPointsSql = "SELECT LoyaltyPoint FROM Account WHERE AccountID = ?";
+            PreparedStatement getPointsStmt = conn.prepareStatement(getPointsSql);
+            getPointsStmt.setInt(1, accountId);
+            ResultSet rs = getPointsStmt.executeQuery();
+            int currentPoints = 0;
+            if (rs.next()) {
+                currentPoints = rs.getInt("LoyaltyPoint");
+            }
+            
+            // Calculate new total points
+            int newTotalPoints = currentPoints + pointsToAdd;
+            
+            // Determine membership level
+            String newLevel = "None"; // Default level
+            if (newTotalPoints >= 2000) {
+                newLevel = "Platinum";
+            } else if (newTotalPoints >= 500) {
+                newLevel = "Gold";
+            } else if (newTotalPoints >= 150) {
+                newLevel = "Silver";
+            }
+            
+            // Update points and level
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, pointsToAdd);
+            stmt.setString(2, newLevel);
+            stmt.setInt(3, accountId);
+            stmt.executeUpdate();
+            
+        } catch (SQLException ex) {
+            Logger.getLogger(DAOAccount.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 
     public static void main(String[] args) {
         DAOAccount dao = new DAOAccount();
@@ -434,8 +472,11 @@ public class DAOAccount extends DBConnection {
 //    for(Account acc : list){
 //        System.out.println(acc);
 //    }
-Account acc = new Account("Hax","abcd@gmail.com","B@o11711","0987564321","Add",2004,true,"Customer","Male");
- int n = dao.createAccount(acc);
+//Account acc = new Account("Hax","abcd@gmail.com","B@o11711","0987564321","Add",2004,true,"Customer","Male");
+// int n = dao.createAccount(acc);
+ dao.updateLoyaltyPointsAndLevel(2, 500000);
     }
+    
+    
 
 }

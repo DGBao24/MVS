@@ -86,6 +86,35 @@ public class BookingDAO extends DBConnection {
 
     }
 
+    public Order getOrderById(int stid) {
+
+        String sql = "Select * from [Order] where OrderID =?";
+        PreparedStatement stm;
+        try {
+            stm = conn.prepareStatement(sql);
+            stm.setInt(1, stid);
+            ResultSet rs = stm.executeQuery();
+            while (rs.next()) {
+                Order order = new Order(
+                        rs.getInt("OrderID"),
+                        rs.getInt("AccountID"),
+                        rs.getTimestamp("OrderDate"),
+                        rs.getFloat("TotalAmount"),
+                        rs.getInt("SeatQuantity"),
+                        rs.getInt("ComboQuantity"),
+                        rs.getInt("PromotionID"),
+                        rs.getString("Status")
+                );
+                return order;
+            }
+
+        } catch (SQLException ex) {
+            Logger.getLogger(BookingDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+
+    }
+
     public Movie getMovieById(int id) {
         Movie movie = null;
         try {
@@ -196,17 +225,17 @@ public class BookingDAO extends DBConnection {
 
     public List<Seat> getSeatByRoomAndShowtime(int rid, int showtimeID) {
         List<Seat> seats = getSeatByRoom(rid);
-        
+
         // Get list of booked/processing seats for this showtime
-        String sql = "SELECT s.SeatID, t.Status AS TicketStatus FROM Seat s " +
-                     "JOIN Ticket t ON s.SeatID = t.SeatID " +
-                     "WHERE s.RoomID = ? AND t.ShowTimeID = ?";
-        
+        String sql = "SELECT s.SeatID, t.Status AS TicketStatus FROM Seat s "
+                + "JOIN Ticket t ON s.SeatID = t.SeatID "
+                + "WHERE s.RoomID = ? AND t.ShowTimeID = ?";
+
         try (PreparedStatement stm = conn.prepareStatement(sql)) {
             stm.setInt(1, rid);
             stm.setInt(2, showtimeID);
             ResultSet rs = stm.executeQuery();
-            
+
             // Create a map of seatID to status for quick lookup
             Map<Integer, String> seatStatusMap = new HashMap<>();
             while (rs.next()) {
@@ -215,7 +244,7 @@ public class BookingDAO extends DBConnection {
                 String status = ticketStatus ? "Booked" : "Processing";
                 seatStatusMap.put(seatID, status);
             }
-            
+
             // Update status of seats in the list
             for (Seat seat : seats) {
                 if (seatStatusMap.containsKey(seat.getSeatID())) {
@@ -225,7 +254,7 @@ public class BookingDAO extends DBConnection {
         } catch (SQLException ex) {
             Logger.getLogger(BookingDAO.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
         return seats;
     }
 
@@ -461,17 +490,17 @@ public class BookingDAO extends DBConnection {
         return null;
     }
 
-    public int insertOrder(int accountId, Timestamp orderDate, String status) {
+    public int insertOrder(int accountId, Timestamp orderDate,int SeatQuantity, String status) {
         int orderId = -1;
         String sql = "INSERT INTO [dbo].[Order] (AccountID, OrderDate,TotalAmount,SeatQuantity,  Status) "
-                + "VALUES (?, ?,0,0,?)";
+                + "VALUES (?, ?,0,?,?)";
 
         try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             ps.setInt(1, accountId);
             ps.setTimestamp(2, orderDate);
-
-            ps.setString(3, status);
+            ps.setInt(3, SeatQuantity);
+            ps.setString(4, status);
 
             int affectedRows = ps.executeUpdate();
             if (affectedRows > 0) {
@@ -487,7 +516,7 @@ public class BookingDAO extends DBConnection {
         return orderId;
     }
 
-    public void insertOrderCombo(int orderID, int comboID,int quantity,double price) {
+    public void insertOrderCombo(int orderID, int comboID, int quantity, double price) {
         String sql = "INSERT INTO OrderCombo (OrderID, ComboID,Quantity,Price) VALUES (?, ?,?,?)";
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -502,20 +531,20 @@ public class BookingDAO extends DBConnection {
             e.printStackTrace();
         }
     }
-    
-    public int updateOrderCombo(int OrderComboID,int OrderID,int ComboID,int Quantity,double price) {
+
+    public int updateOrderCombo(int OrderComboID, int OrderID, int ComboID, int Quantity, double price) {
         String sql = "UPDATE OrderCombo SET OrderID=?, ComboID=?,Quantity=?,Price=? Where OrderComboID= ?";
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setInt(1,OrderID);
+            ps.setInt(1, OrderID);
             ps.setInt(2, OrderID);
-            
+
             ps.setInt(3, Quantity);
             ps.setDouble(4, price);
             ps.setInt(5, OrderComboID);
 
-            return ps.executeUpdate (); // Trả về số dòng bị ảnh hưởng
+            return ps.executeUpdate(); // Trả về số dòng bị ảnh hưởng
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -543,11 +572,11 @@ public class BookingDAO extends DBConnection {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            
+
         }
         return order;
     }
-    
+
     public OrderCombo getLatestOrderCombo() {
         OrderCombo order = null;
         String sql = "SELECT TOP 1 * FROM [dbo].[OrderCombo] ORDER BY OrderComboID DESC";
@@ -562,11 +591,11 @@ public class BookingDAO extends DBConnection {
                 order.setComboID(rs.getInt("ComboID"));
                 order.setQuantity(rs.getInt("Quantity"));
                 order.setPrice(rs.getFloat("Price"));
-                
+
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            
+
         }
         return order;
     }
@@ -589,14 +618,10 @@ public class BookingDAO extends DBConnection {
         return -1;
     }
 
-    
-
-        
-
-    public int updateComboAndPromotion(int orderId, double totalAmount, int seatQuantity,int comboQuantity, int promotionId) {
-        String sql = "UPDATE [dbo].[Order] " +
-                     "SET ToTalAmount = ?, SeatQuantity = ?, ComboQuantity = ?, PromotionID = ? " +
-                     "WHERE OrderID = ?";
+    public int updateComboAndPromotion(int orderId, double totalAmount, int seatQuantity, int comboQuantity, int promotionId) {
+        String sql = "UPDATE [dbo].[Order] "
+                + "SET ToTalAmount = ?, SeatQuantity = ?, ComboQuantity = ?, PromotionID = ? "
+                + "WHERE OrderID = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setDouble(1, totalAmount);
             ps.setInt(2, seatQuantity);
@@ -610,16 +635,16 @@ public class BookingDAO extends DBConnection {
             return -1; // Trả về -1 nếu có lỗi
         }
     }
-    
-    public int updateComboOrder(int orderId, double totalAmount, int seatQuantity,int comboQuantity) {
-        String sql = "UPDATE [dbo].[Order] " +
-                     "SET ToTalAmount = ?, SeatQuantity = ?, ComboQuantity = ? " +
-                     "WHERE OrderID = ?";
+
+    public int updateComboOrder(int orderId, double totalAmount, int seatQuantity, int comboQuantity) {
+        String sql = "UPDATE [dbo].[Order] "
+                + "SET ToTalAmount = ?, SeatQuantity = ?, ComboQuantity = ? "
+                + "WHERE OrderID = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setDouble(1, totalAmount);
             ps.setInt(2, seatQuantity);
             ps.setInt(3, comboQuantity);
-           
+
             ps.setInt(4, orderId);
 
             return ps.executeUpdate(); // Trả về số dòng bị ảnh hưởng
@@ -628,15 +653,15 @@ public class BookingDAO extends DBConnection {
             return -1; // Trả về -1 nếu có lỗi
         }
     }
-    
+
     public int updatePromotionOrder(int orderId, double totalAmount, int seatQuantity, int promotionId) {
-        String sql = "UPDATE [dbo].[Order] " +
-                     "SET ToTalAmount = ?, SeatQuantity = ?, PromotionID = ? " +
-                     "WHERE OrderID = ?";
+        String sql = "UPDATE [dbo].[Order] "
+                + "SET ToTalAmount = ?, SeatQuantity = ?, PromotionID = ? "
+                + "WHERE OrderID = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setDouble(1, totalAmount);
             ps.setInt(2, seatQuantity);
-            
+
             ps.setInt(3, promotionId);
             ps.setInt(4, orderId);
 
@@ -646,11 +671,11 @@ public class BookingDAO extends DBConnection {
             return -1; // Trả về -1 nếu có lỗi
         }
     }
-    
+
     public int updateOrderPrice(int orderId, double totalAmount) {
-        String sql = "UPDATE [dbo].[Order] " +
-                     "SET ToTalAmount = ? " +
-                     "WHERE OrderID = ?";
+        String sql = "UPDATE [dbo].[Order] "
+                + "SET ToTalAmount = ? "
+                + "WHERE OrderID = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setDouble(1, totalAmount);
             ps.setInt(2, orderId);
@@ -661,24 +686,24 @@ public class BookingDAO extends DBConnection {
             return -1; // Trả về -1 nếu có lỗi
         }
     }
-    
-    public boolean checkOrderComboExists(int orderID) {
-    String query = "SELECT COUNT(*) FROM OrderCombo WHERE OrderID = ?";
-    try (
-         PreparedStatement ps = conn.prepareStatement(query)) {
-        ps.setInt(1, orderID);
-        try (ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) {
-                return rs.getInt(1) > 0;
-            }
-        }
-    } catch (SQLException e) {
-        e.printStackTrace();
-    }
-    return false;
-}
 
-      public boolean updateOrderStatus(Order order) {
+    public boolean checkOrderComboExists(int orderID) {
+        String query = "SELECT COUNT(*) FROM OrderCombo WHERE OrderID = ?";
+        try (
+                PreparedStatement ps = conn.prepareStatement(query)) {
+            ps.setInt(1, orderID);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean updateOrderStatus(Order order) {
         String sql = "UPDATE [dbo].[Order] SET [Status] = ? WHERE OrderID = ?";
         try {
             PreparedStatement st = conn.prepareStatement(sql);
@@ -686,64 +711,57 @@ public class BookingDAO extends DBConnection {
             st.setInt(2, order.getOrderID());
             return st.executeUpdate() > 0;
         } catch (SQLException ex) {
-           ex.printStackTrace();
+            ex.printStackTrace();
         }
         return false;
     }
-      public List<Ticket> getTicketsByShowtime(int showtimeID) {
+
+    public List<Ticket> getTicketsByShowtime(int showtimeID) {
         List<Ticket> tickets = new ArrayList<>();
         String sql = "SELECT * FROM Ticket WHERE ShowTimeID = ?";
-        
+
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setInt(1, showtimeID);
             ResultSet rs = ps.executeQuery();
-            
+
             while (rs.next()) {
                 Ticket ticket = new Ticket(
-                    rs.getInt("TicketID"),
-                    rs.getInt("SeatID"),
-                    rs.getInt("ShowTimeID"),
-                    rs.getInt("OrderID"),
-                    rs.getBoolean("Status")
+                        rs.getInt("TicketID"),
+                        rs.getInt("SeatID"),
+                        rs.getInt("ShowTimeID"),
+                        rs.getInt("OrderID"),
+                        rs.getBoolean("Status")
                 );
                 tickets.add(ticket);
             }
         } catch (SQLException ex) {
             Logger.getLogger(BookingDAO.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
         return tickets;
     }
 
-    public List<Order> getOrdersByAccountID(int accountID) {
-        List<Order> orders = new ArrayList<>();
-        String sql = "SELECT * FROM [dbo].[Order] WHERE AccountID = ? AND Status = 'Completed' ORDER BY OrderDate DESC";
-        
-        try {
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setInt(1, accountID);
-            ResultSet rs = ps.executeQuery();
-            
-            while (rs.next()) {
-                Order order = new Order();
-                order.setOrderID(rs.getInt("OrderID"));
-                order.setAccountID(rs.getInt("AccountID"));
-                order.setOrderDate(rs.getTimestamp("OrderDate"));
-                order.setTotalAmount(rs.getFloat("TotalAmount"));
-                order.setSeatQuantity(rs.getInt("SeatQuantity"));
-                order.setComboQuantity(rs.getInt("ComboQuantity"));
-                order.setPromotionID(rs.getInt("PromotionID"));
-                order.setStatus(rs.getString("Status"));
-                orders.add(order);
-            }
-        } catch (SQLException ex) {
-            Logger.getLogger(BookingDAO.class.getName()).log(Level.SEVERE, null, ex);
+    public void deleteTicketByOrderID(int oid) {
+        String sql = "DELETE FROM [dbo].[Ticket] WHERE OrderID = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, oid);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace(); // In lỗi ra console (có thể thay bằng logging nếu cần)
         }
-        
-        return orders;
     }
     
+    public void deleteOrderComboByOrderID(int oid) {
+        String sql = "DELETE FROM [dbo].[OrderCombo] WHERE OrderID = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, oid);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace(); // In lỗi ra console (có thể thay bằng logging nếu cần)
+        }
+    }
+
     public static void main(String[] args) {
         BookingDAO dao = new BookingDAO();
         String StartTime = "2025-03-23 00:00:00.000";
@@ -753,55 +771,169 @@ public class BookingDAO extends DBConnection {
 //            System.out.println(time);
 //        }
 
-        Ticket ticket = new Ticket(2, 1, 8);
-        int n = dao.insertTicket(ticket);
+//        Ticket ticket = new Ticket(2, 1, 8);
+//        int n = dao.insertTicket(ticket);
+//        Order order = dao.getOrderById(10);
+//        System.out.println(order);
 //        int n = dao.getShowtimeID(1, 1, 1, orderDate);
 //        if(n>0){
 //            System.out.println(n);
 //        }
 //    Order order = dao.getLatestOrder();
 //        System.out.println(order);
+
+        dao.deleteTicketByOrderID(14);
     }
-    
-    public ResultSet getTicketsDetailsByOrderID(int orderID) {
-        String sql = "SELECT t.TicketID, t.SeatID, t.ShowtimeID, t.OrderID, s.SeatRow, s.SeatNumber, s.SeatType, \n" +
-"                st.StartTime, st.EndTime, \n" +
-"                c.CinemaName, cr.RoomName, cr.RoomType, \n" +
-"                m.MovieID, m.MovieName, m.Duration, m.BasePrice\n" +
-"                FROM [dbo].[Ticket]  t \n" +
-"                JOIN Seat s ON t.SeatID = s.SeatID \n" +
-"                JOIN ShowTime st ON t.ShowTimeID = st.ShowTimeID \n" +
-"                JOIN Cinema c ON st.CinemaID = c.CinemaID \n" +
-"                JOIN CinemaRoom cr ON st.RoomID = cr.RoomID \n" +
-"                JOIN Movie m ON st.MovieID = m.MovieID \n" +
-"                WHERE t.OrderID = ?";
-        
+
+    public boolean cancelOrder(int orderId) {
         try {
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setInt(1, orderID);
-            return ps.executeQuery();
+            conn.setAutoCommit(false);
+
+            // Get order details
+            String getOrderSql = "SELECT * FROM [Order] WHERE OrderID = ?";
+            PreparedStatement getOrderStmt = conn.prepareStatement(getOrderSql);
+            getOrderStmt.setInt(1, orderId);
+            ResultSet orderRs = getOrderStmt.executeQuery();
+
+            if (!orderRs.next()) {
+                return false;
+            }
+
+            // Update order status to Failed
+            String updateOrderSql = "UPDATE [Order] SET Status = 'Failed' WHERE OrderID = ?";
+            PreparedStatement updateOrderStmt = conn.prepareStatement(updateOrderSql);
+            updateOrderStmt.setInt(1, orderId);
+            updateOrderStmt.executeUpdate();
+
+            // Get tickets for this order
+            String getTicketsSql = "SELECT SeatID FROM Ticket WHERE OrderID = ?";
+            PreparedStatement getTicketsStmt = conn.prepareStatement(getTicketsSql);
+            getTicketsStmt.setInt(1, orderId);
+            ResultSet ticketsRs = getTicketsStmt.executeQuery();
+
+            // Update seat status back to Available
+            String updateSeatSql = "UPDATE Seat SET Status = 'Available' WHERE SeatID = ?";
+            PreparedStatement updateSeatStmt = conn.prepareStatement(updateSeatSql);
+
+            while (ticketsRs.next()) {
+                int seatId = ticketsRs.getInt("SeatID");
+                updateSeatStmt.setInt(1, seatId);
+                updateSeatStmt.executeUpdate();
+            }
+
+            // Delete tickets
+            String deleteTicketsSql = "DELETE FROM Ticket WHERE OrderID = ?";
+            PreparedStatement deleteTicketsStmt = conn.prepareStatement(deleteTicketsSql);
+            deleteTicketsStmt.setInt(1, orderId);
+            deleteTicketsStmt.executeUpdate();
+
+            // Delete order combos
+            String deleteCombosSql = "DELETE FROM OrderCombo WHERE OrderID = ?";
+            PreparedStatement deleteCombosStmt = conn.prepareStatement(deleteCombosSql);
+            deleteCombosStmt.setInt(1, orderId);
+            deleteCombosStmt.executeUpdate();
+
+            conn.commit();
+            return true;
+
+        } catch (SQLException ex) {
+            try {
+                conn.rollback();
+            } catch (SQLException e) {
+                Logger.getLogger(BookingDAO.class.getName()).log(Level.SEVERE, null, e);
+            }
+            Logger.getLogger(BookingDAO.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
+        } finally {
+            try {
+                conn.setAutoCommit(true);
+            } catch (SQLException ex) {
+                Logger.getLogger(BookingDAO.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+
+    public void checkAndUpdateOrderStatus() {
+        String sql = "UPDATE [Order] SET Status = 'Failed' "
+                + "WHERE Status = 'Processing' "
+                + "AND DATEDIFF(MINUTE, OrderDate, GETDATE()) >= 5";
+        try {
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.executeUpdate();
         } catch (SQLException ex) {
             Logger.getLogger(BookingDAO.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
-        return null;
     }
+
     
-    public ResultSet getOrderCombosByOrderID(int orderID) {
-        String sql = "SELECT oc.OrderComboID, oc.OrderID, oc.ComboID, oc.Quantity, oc.Price, "
-                + "c.ComboItem, c.Description "
-                + "FROM OrderCombo oc "
-                + "JOIN Combo c ON oc.ComboID = c.ComboID "
-                + "WHERE oc.OrderID = ?";
-        
-        try {
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setInt(1, orderID);
-            return ps.executeQuery();
-        } catch (SQLException ex) {
-            Logger.getLogger(BookingDAO.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
-        return null;
-    }
+    
+     public List<Order> getOrdersByAccountID(int accountID) {
+         List<Order> orders = new ArrayList<>();
+         String sql = "SELECT * FROM [dbo].[Order] WHERE AccountID = ? AND Status = 'Completed' ORDER BY OrderDate DESC";
+         
+         try {
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ps.setInt(1, accountID);
+             ResultSet rs = ps.executeQuery();
+             
+             while (rs.next()) {
+                 Order order = new Order();
+                 order.setOrderID(rs.getInt("OrderID"));
+                 order.setAccountID(rs.getInt("AccountID"));
+                 order.setOrderDate(rs.getTimestamp("OrderDate"));
+                 order.setTotalAmount(rs.getFloat("TotalAmount"));
+                 order.setSeatQuantity(rs.getInt("SeatQuantity"));
+                 order.setComboQuantity(rs.getInt("ComboQuantity"));
+                 order.setPromotionID(rs.getInt("PromotionID"));
+                 order.setStatus(rs.getString("Status"));
+                 orders.add(order);
+             }
+         } catch (SQLException ex) {
+             Logger.getLogger(BookingDAO.class.getName()).log(Level.SEVERE, null, ex);
+         }
+         
+         return orders;
+     }
+        public ResultSet getTicketsDetailsByOrderID(int orderID) {
+         String sql = "SELECT t.TicketID, t.SeatID, t.ShowTimeID, t.OrderID, "
+                 + "s.SeatRow, s.SeatNumber, s.SeatType, "
+                 + "st.StartTime, st.EndTime, "
+                 + "c.CinemaName, cr.RoomName, cr.RoomType, "
+                 + "m.MovieID, m.MovieName, m.Duration, m.ImageURL, m.BasePrice "
+                 + "FROM Ticket t "
+                 + "JOIN Seat s ON t.SeatID = s.SeatID "
+                 + "JOIN ShowTime st ON t.ShowTimeID = st.ShowTimeID "
+                 + "JOIN Cinema c ON st.CinemaID = c.CinemaID "
+                 + "JOIN CinemaRoom cr ON st.RoomID = cr.RoomID "
+                 + "JOIN Movie m ON st.MovieID = m.MovieID "
+                 + "WHERE t.OrderID = ?";
+         
+         try {
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ps.setInt(1, orderID);
+             return ps.executeQuery();
+         } catch (SQLException ex) {
+             Logger.getLogger(BookingDAO.class.getName()).log(Level.SEVERE, null, ex);
+         }
+         
+         return null;
+     }
+     
+     public ResultSet getOrderCombosByOrderID(int orderID) {
+         String sql = "SELECT oc.OrderComboID, oc.OrderID, oc.ComboID, oc.Quantity, oc.Price, "
+                 + "c.ComboItem, c.Description "
+                 + "FROM OrderCombo oc "
+                 + "JOIN Combo c ON oc.ComboID = c.ComboID "
+                 + "WHERE oc.OrderID = ?";
+         
+         try {
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ps.setInt(1, orderID);
+             return ps.executeQuery();
+         } catch (SQLException ex) {
+             Logger.getLogger(BookingDAO.class.getName()).log(Level.SEVERE, null, ex);
+         }
+         
+         return null;
+     }
 }
