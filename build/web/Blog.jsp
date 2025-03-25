@@ -1,7 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@page import="java.util.List"%>
-<%@page import="entity.Cinema, entity.Account, entity.Image"%>
-
+<%@page import="entity.Blog,entity.Account,entity.Image,model.DAOImage"%>
+<%@page import="java.text.SimpleDateFormat"%>
 <%
     Object accObj = session.getAttribute("account");
     Account account = null;
@@ -11,16 +11,18 @@
 
     boolean isLoggedIn = (account != null);
     boolean isAdmin = isLoggedIn && "admin".equalsIgnoreCase(account.getRole());
-        boolean isManager = isLoggedIn && "Manager".equalsIgnoreCase(account.getRole());
-
-    Integer customerID = (Integer) session.getAttribute("CustomerID");
+    boolean isManager = isLoggedIn && "Manager".equalsIgnoreCase(account.getRole());
+    
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    DAOImage daoImage = new DAOImage();
 %>
+
 <!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>CINEMATIC - Cinemas</title>
+        <title>CINEMATIC - Blogs</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
         <link rel="stylesheet" href="frontend/css/styles.css">
@@ -32,17 +34,34 @@
                 object-fit: cover;
                 margin-left: 8px;
             }
-            
-            .cinema-card {
+
+            .blog-card {
                 transition: transform 0.3s ease;
                 border: none;
                 border-radius: 15px;
                 overflow: hidden;
                 box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+                margin-bottom: 20px;
             }
-            
-            .cinema-card:hover {
+
+            .blog-card:hover {
                 transform: translateY(-5px);
+            }
+
+            .blog-card .card-img-top {
+                height: 250px;
+                object-fit: cover;
+            }
+
+            .blog-card .card-title {
+                font-size: 1.25rem;
+                font-weight: bold;
+                margin-bottom: 0.5rem;
+            }
+
+            .blog-date {
+                font-size: 0.9rem;
+                color: #6c757d;
             }
         </style>
     </head>
@@ -58,8 +77,8 @@
                         <ul class="navbar-nav me-auto">
                             <li class="nav-item"><a class="nav-link" href="home">HOME</a></li>
                             <li class="nav-item"><a class="nav-link" href="MovieController?service=list">MOVIES</a></li>
-                            <li class="nav-item"><a class="nav-link active" href="CimemaController">CINEMAS</a></li>
-                            <li class="nav-item"><a class="nav-link" href="BlogController?action=list">BLOGS</a></li>
+                            <li class="nav-item"><a class="nav-link" href="CimemaController">CINEMAS</a></li>
+                            <li class="nav-item"><a class="nav-link active" href="BlogController?action=list">BLOGS</a></li>
                             <li class="nav-item"><a class="nav-link" href="PromotionController?action=publicList">PROMOTIONS</a></li>
                         </ul>
                         <div class="navbar-nav">
@@ -90,41 +109,71 @@
         </header>
 
         <main class="container py-5 mt-5">
-            <h2 class="text-center mb-4">Our Cinemas</h2>
-            <div class="row g-4">
-                <% List<Cinema> cinemas = (List<Cinema>) request.getAttribute("CINEMA_LIST");
-                if (cinemas != null) {
-                    for (Cinema cinema : cinemas) { %>
-                <div class="col-md-6 col-lg-3">
-                    <div class="card h-100 cinema-card">
-                        <div class="card-body text-center">
-                            <img src="https://c8.alamy.com/comp/2KE1GD2/cinema-building-vector-illustration-isolated-on-white-background-movie-theater-and-houses-exterior-view-in-flat-style-2KE1GD2.jpg" alt="<%= cinema.getCinemaName() %>" class="mb-3" style="width: 80px;">
-                            <h5 class="card-title"><%= cinema.getCinemaName() %></h5>
-                            <p class="card-text"><%= cinema.getAddress() %></p>
+            <h2 class="text-center mb-4">Latest Blogs</h2>
+            
+            <div class="row">
+                <% List<Blog> blogs = (List<Blog>) request.getAttribute("blogList");
+                if (blogs != null && !blogs.isEmpty()) {
+                    for (Blog blog : blogs) { %>
+                <div class="col-md-6 col-lg-4">
+                    <div class="card blog-card">
+                        <% if (blog.getBlogPoster() > 0) { 
+                            String imagePath = daoImage.getImagePathById(blog.getBlogPoster());
+                            if (imagePath != null) {
+                        %>
+                            <img src="${pageContext.request.contextPath}/images/<%= imagePath %>" class="card-img-top" alt="<%= blog.getTitle() %>">
+                        <% } else { %>
+                            <div class="card-img-top d-flex align-items-center justify-content-center bg-light" style="height: 250px;">
+                                <span class="text-muted">Image not found</span>
+                            </div>
+                        <% }
+                        } else { %>
+                            <div class="card-img-top d-flex align-items-center justify-content-center bg-light" style="height: 250px;">
+                                <span class="text-muted">No image</span>
+                            </div>
+                        <% } %>
+                        <div class="card-body">
+                            <h5 class="card-title"><%= blog.getTitle() %></h5>
+                            <p class="blog-date">
+                                <i class="fas fa-calendar"></i> <%= sdf.format(blog.getReleaseDate()) %>
+                            </p>
+                            <div class="text-end">
+                                <a href="BlogController?action=detail&id=<%= blog.getBlogID() %>" class="btn btn-primary">
+                                    <i class="fas fa-info-circle"></i> Details
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
                 <% }
-                } %>
+                } else { %>
+                <div class="col-12">
+                    <div class="alert alert-info text-center" role="alert">
+                        No blogs available at the moment.
+                    </div>
+                </div>
+                <% } %>
             </div>
         </main>
 
         <footer class="bg-dark text-white py-4 mt-5">
             <div class="container">
                 <div class="row">
-                    <div class="col-12 text-center">
-                        <div class="social-links mb-3">
-                            <a href="#" class="text-white me-3"><i class="fab fa-facebook"></i></a>
-                            <a href="#" class="text-white me-3"><i class="fab fa-twitter"></i></a>
-                            <a href="#" class="text-white me-3"><i class="fab fa-instagram"></i></a>
-                        </div>
-                        <p class="mb-0">&copy; 2024 CINEMATIC. All rights reserved.</p>
+                    <div class="col-md-6">
+                        <h5>About CINEMATIC</h5>
+                        <p>Your premier destination for movies and entertainment.</p>
                     </div>
+                    <div class="col-md-6 text-md-end">
+                        <h5>Contact Us</h5>
+                        <p>Email: info@cinematic.com<br>Phone: (123) 456-7890</p>
+                    </div>
+                </div>
+                <div class="text-center mt-3">
+                    <p>&copy; 2025 CINEMATIC. All rights reserved.</p>
                 </div>
             </div>
         </footer>
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
     </body>
 </html>

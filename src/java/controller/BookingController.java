@@ -84,13 +84,28 @@ public class BookingController extends HttpServlet {
 
             if (roomID != null && !roomID.isEmpty()) {
                 int rid = Integer.parseInt(roomID);
-                List<Seat> seats = dao.getSeatByRoom(rid);
-                ResultSet rsSea = dao.getData("SELECT SeatID, SeatType, SeatRow, SeatNumber,Status FROM Seat "
-                        + "WHERE RoomID = " + rid + " ORDER BY SeatRow ASC, SeatNumber ASC");
+                
+                // Get the showtime ID based on selected parameters
+                Timestamp timestamp = Timestamp.valueOf(startTime.split("\\.")[0]);
+                int cid = Integer.parseInt(cinemaID);
+                int showtimeID = dao.getShowtimeID(mid, cid, rid, timestamp);
+                
+                // Use the new method that checks seat availability for this specific showtime
+                List<Seat> seats = dao.getSeatByRoomAndShowtime(rid, showtimeID);
+                
+                // Update the existing ResultSet (keeping for backwards compatibility)
+                ResultSet rsSea = dao.getData("SELECT s.SeatID, s.SeatType, s.SeatRow, s.SeatNumber, " +
+                        "CASE WHEN t.TicketID IS NULL THEN 'Available' " +
+                        "WHEN t.Status = 1 THEN 'Booked' " +
+                        "ELSE 'Processing' END AS Status " +
+                        "FROM Seat s " +
+                        "LEFT JOIN (SELECT * FROM Ticket WHERE ShowTimeID = " + showtimeID + ") t ON s.SeatID = t.SeatID " +
+                        "WHERE s.RoomID = " + rid + " ORDER BY s.SeatRow ASC, s.SeatNumber ASC");
+                
                 session.setAttribute("sea", rsSea);
                 session.setAttribute("seats", seats);
                 request.setAttribute("selectedRoomID", rid);
-
+                request.setAttribute("selectedShowtimeID", showtimeID);
             }
 
             if (request.getParameter("confirm") != null) {

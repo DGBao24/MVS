@@ -24,6 +24,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  *
@@ -169,7 +171,7 @@ public class BookingDAO extends DBConnection {
 
     public List<Seat> getSeatByRoom(int rid) {
         List<Seat> listS = new ArrayList<>();
-        String sql = "Select * from Seat where RoomID =? And Status like 'Available'";
+        String sql = "Select * from Seat where RoomID =?";
         PreparedStatement stm;
         try {
             stm = conn.prepareStatement(sql);
@@ -183,14 +185,48 @@ public class BookingDAO extends DBConnection {
                 seat.setSeatNumber(rs.getInt("SeatNumber"));
                 seat.setSeatType(rs.getString("SeatType"));
                 seat.setRoomID(rs.getInt("RoomID"));
-                seat.setStatus(rs.getString("Status"));
+                seat.setStatus("Available"); // Default status
                 listS.add(seat);
             }
         } catch (SQLException ex) {
             Logger.getLogger(BookingDAO.class.getName()).log(Level.SEVERE, null, ex);
         }
         return listS;
+    }
 
+    public List<Seat> getSeatByRoomAndShowtime(int rid, int showtimeID) {
+        List<Seat> seats = getSeatByRoom(rid);
+        
+        // Get list of booked/processing seats for this showtime
+        String sql = "SELECT s.SeatID, t.Status AS TicketStatus FROM Seat s " +
+                     "JOIN Ticket t ON s.SeatID = t.SeatID " +
+                     "WHERE s.RoomID = ? AND t.ShowTimeID = ?";
+        
+        try (PreparedStatement stm = conn.prepareStatement(sql)) {
+            stm.setInt(1, rid);
+            stm.setInt(2, showtimeID);
+            ResultSet rs = stm.executeQuery();
+            
+            // Create a map of seatID to status for quick lookup
+            Map<Integer, String> seatStatusMap = new HashMap<>();
+            while (rs.next()) {
+                int seatID = rs.getInt("SeatID");
+                boolean ticketStatus = rs.getBoolean("TicketStatus");
+                String status = ticketStatus ? "Booked" : "Processing";
+                seatStatusMap.put(seatID, status);
+            }
+            
+            // Update status of seats in the list
+            for (Seat seat : seats) {
+                if (seatStatusMap.containsKey(seat.getSeatID())) {
+                    seat.setStatus(seatStatusMap.get(seat.getSeatID()));
+                }
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(BookingDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        return seats;
     }
 
     public List<Combo> getCombo(String sql) {
@@ -332,48 +368,18 @@ public class BookingDAO extends DBConnection {
     }
 
     public int updateSeatBooking(int sid) {
-        Seat seat = getSeatByID(sid);
-        int affectedRow = 0;
-        String sql = "UPDATE [dbo].[Seat] SET [Status] = 'Processing' WHERE SeatID = ?";
-        try {
-            PreparedStatement ps = conn.prepareStatement(sql);
-
-            ps.setInt(1, seat.getSeatID());
-            affectedRow = ps.executeUpdate();
-        } catch (SQLException ex) {
-            Logger.getLogger(CinemaRoomDAO.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return affectedRow;
+        // No need to update the Seat table anymore
+        return sid;
     }
 
     public int updateSeatPayment(int sid) {
-        Seat seat = getSeatByID(sid);
-        int affectedRow = 0;
-        String sql = "UPDATE [dbo].[Seat] SET [Status] = 'Booked' WHERE SeatID = ?";
-        try {
-            PreparedStatement ps = conn.prepareStatement(sql);
-
-            ps.setInt(1, seat.getSeatID());
-            affectedRow = ps.executeUpdate();
-        } catch (SQLException ex) {
-            Logger.getLogger(CinemaRoomDAO.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return affectedRow;
+        // No need to update the Seat table anymore
+        return sid;
     }
 
     public int updateSeatEndTime(int sid) {
-        Seat seat = getSeatByID(sid);
-        int affectedRow = 0;
-        String sql = "UPDATE [dbo].[Seat] SET [Status] = 'Available' WHERE SeatID = ?";
-        try {
-            PreparedStatement ps = conn.prepareStatement(sql);
-
-            ps.setInt(1, seat.getSeatID());
-            affectedRow = ps.executeUpdate();
-        } catch (SQLException ex) {
-            Logger.getLogger(CinemaRoomDAO.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return affectedRow;
+        // No need to update the Seat table anymore
+        return sid;
     }
 
     public List<Integer> getLastInsertedTickets(int count) {

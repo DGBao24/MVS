@@ -28,7 +28,7 @@ public class SeatDAO extends DBConnection{
                     rs.getInt("SeatNumber"),
                     rs.getString("SeatType"),
                     rs.getInt("RoomID"),
-                    rs.getString("Status")
+                    "Available" // Default to Available
                 ));
             }
            
@@ -115,6 +115,43 @@ public class SeatDAO extends DBConnection{
             System.out.println("Error getting all seats: " + e.getMessage()); // Debug log
             e.printStackTrace();
         }
+        return seats;
+    }
+
+    // New method to get seats with status for a specific showtime
+    public List<Seat> getSeatsByRoomAndShowtime(int roomID, int showtimeID) {
+        List<Seat> seats = getSeatsByRoom(roomID);
+        
+        // Get list of booked/processing seats for this showtime
+        String sql = "SELECT s.SeatID, t.Status AS TicketStatus FROM Seat s " +
+                     "JOIN Ticket t ON s.SeatID = t.SeatID " +
+                     "WHERE s.RoomID = ? AND t.ShowTimeID = ?";
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, roomID);
+            ps.setInt(2, showtimeID);
+            ResultSet rs = ps.executeQuery();
+            
+            // Create a map of seatID to status for quick lookup
+            java.util.Map<Integer, String> seatStatusMap = new java.util.HashMap<>();
+            while (rs.next()) {
+                int seatID = rs.getInt("SeatID");
+                boolean ticketStatus = rs.getBoolean("TicketStatus");
+                String status = ticketStatus ? "Booked" : "Processing";
+                seatStatusMap.put(seatID, status);
+            }
+            
+            // Update status of seats in the list
+            for (Seat seat : seats) {
+                if (seatStatusMap.containsKey(seat.getSeatID())) {
+                    seat.setStatus(seatStatusMap.get(seat.getSeatID()));
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Error getting seats by room and showtime: " + e.getMessage());
+            e.printStackTrace();
+        }
+        
         return seats;
     }
 

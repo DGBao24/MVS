@@ -36,51 +36,67 @@ public class LoginController extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
+        
+        String email = request.getParameter("email");
+        String password = request.getParameter("password");
+        
+        // If no email/password, show login form
+        if (email == null || password == null) {
+            request.getRequestDispatcher("login.jsp").forward(request, response);
+            return;
+        }
 
-            DAOAccount dao = new DAOAccount();
-            String email = request.getParameter("email");
-            String password = request.getParameter("password");
+        DAOAccount dao = new DAOAccount();
+        
+        // Get stored hashed password from the database
+        String storedHashedPassword = dao.getPasswordByEmail(email);
 
-            // Get stored hashed password from the database
-            String storedHashedPassword = dao.getPasswordByEmail(email);
+        // Handle case where email is not found
+        if (storedHashedPassword == null) {
+            request.setAttribute("mess", "Wrong email or password");
+            request.getRequestDispatcher("login.jsp").forward(request, response);
+            return;
+        }
 
-            // Handle case where email is not found
-            if (storedHashedPassword == null) {
-                request.setAttribute("mess", "Wrong email or password");
-                request.getRequestDispatcher("login.jsp").forward(request, response);
-                return;
-            }
+        // Verify password with BCrypt
+        boolean isPasswordMatch = BCrypt.checkpw(password, storedHashedPassword);
+        Account account = dao.AccountLogin(email, storedHashedPassword);
 
-            // Verify password with BCrypt
-            boolean isPasswordMatch = BCrypt.checkpw(password, storedHashedPassword);
-            Account account = dao.AccountLogin(email, storedHashedPassword);
-
-            // Check if account is null or password does not match
-            if (account == null || !isPasswordMatch) {
-                request.setAttribute("mess", "Wrong email or password");
-                request.getRequestDispatcher("login.jsp").forward(request, response);
+        // Check if account is null or password does not match
+        if (account == null || !isPasswordMatch) {
+            request.setAttribute("mess", "Wrong email or password");
+            request.getRequestDispatcher("login.jsp").forward(request, response);
+            return;
+        }
+        
+        if (!account.isStatus()) {
+            request.setAttribute("mess", "Your account has been disabled");
+            request.getRequestDispatcher("login.jsp").forward(request, response);
+            return;
+        }
+        
+        // Login successful
+        HttpSession session = request.getSession();
+        session.setAttribute("account", account);
+        session.setAttribute("CustomerID", account.getAccountID());
+        
+        // Check for return URL
+        String returnUrl = (String) session.getAttribute("returnUrl");
+        session.removeAttribute("returnUrl"); // Clear it after use
+        
+        if (returnUrl != null) {
+            // Return to the originally requested URL
+            response.sendRedirect(returnUrl);
+        } else {
+            // Default redirect based on role
+            if (account.getRole().equals("Admin") || account.getRole().equals("Manager")) {
+                response.sendRedirect(request.getContextPath() + "/admin");
             } else {
-                if (account.isStatus()) {
-                    HttpSession session = request.getSession();
-                    session.setAttribute("account", account);
-                    session.setAttribute("CustomerID", account.getAccountID());
-                    if (account.getRole().equals("Admin") || account.getRole().equals("Manager")) {
-                        request.getRequestDispatcher("admin").forward(request, response);
-
-                    } else {
-                        request.getRequestDispatcher("home").forward(request, response);
-                    }
-                } else {
-
-                    request.getRequestDispatcher("error.jsp").forward(request, response);
-
-                }
+                response.sendRedirect(request.getContextPath() + "/home");
             }
         }
     }
 
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
      * Handles the HTTP <code>GET</code> method.
      *
@@ -116,7 +132,6 @@ public class LoginController extends HttpServlet {
      */
     @Override
     public String getServletInfo() {
-        return "Short description";
-    }// </editor-fold>
-
+        return "Login Controller";
+    }
 }
