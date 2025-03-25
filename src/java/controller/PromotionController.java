@@ -123,6 +123,12 @@ public class PromotionController extends HttpServlet {
                             return;
                         }
                         
+                        if (dao.isPromotionExist(PromoCode)){
+                            request.setAttribute("error", "Promocode is existed");
+                            response.sendRedirect(request.getContextPath() + "/admin/promo?service=listAll");
+                            return;
+                        }
+                        
                         Promotion promotion = new Promotion(PromoCode, DiscountPercent, StartDate, EndDate, Status, Description, RemainRedemption);
                         int n = dao.insertPromotion(promotion);
                         if (n > 0) {

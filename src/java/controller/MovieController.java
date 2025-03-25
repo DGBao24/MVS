@@ -34,20 +34,12 @@ public class MovieController extends HttpServlet {
             
             if (service == null || service.equals("list")) {
                 // Get now showing movies
-                String genre = request.getParameter("genre");
-                if (genre != null && !genre.isEmpty()) {
-                    // Filter movies by genre
-                    List<Movie> filteredMovies = dao.getMoviesByGenre(genre);
-                    System.out.println("Filtered Movies count: " + (filteredMovies != null ? filteredMovies.size() : 0));
-                    request.setAttribute("filteredMovies", filteredMovies);
-                }
+                
                 List<Movie> showingMovies = dao.getListShowingMovie();
-                System.out.println("Now Showing Movies count: " + (showingMovies != null ? showingMovies.size() : 0));
                 request.setAttribute("listShowing", showingMovies);
                 
                 // Get upcoming movies
                 List<Movie> upcomingMovies = dao.getListUpcomingMovie();
-                System.out.println("Upcoming Movies count: " + (upcomingMovies != null ? upcomingMovies.size() : 0));
                 request.setAttribute("listUpcoming", upcomingMovies);
                 
                 // Forward to the movie list page

@@ -101,6 +101,21 @@ public class DAOPromotion extends DBConnection {
         }
         return list;
     }
+     public boolean isPromotionExist(String promo) {
+        try {
+            String sql = "SELECT* FROM [dbo].[Promotion] where PromoCode=?";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, promo);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
     
     public Promotion getPromoByID(int pid){
         String sql = "SELECT [PromotionID],[PromoCode],[DiscountPercent],[StartDate],[EndTime],[Status],[Description],[RemainRedemption] FROM [dbo].[Promotion] where PromotionID = ?";

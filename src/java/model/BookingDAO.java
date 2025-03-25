@@ -764,18 +764,17 @@ public class BookingDAO extends DBConnection {
     }
     
     public ResultSet getTicketsDetailsByOrderID(int orderID) {
-        String sql = "SELECT t.TicketID, t.SeatID, t.ShowTimeID, t.OrderID, "
-                + "s.SeatRow, s.SeatNumber, s.SeatType, "
-                + "st.StartTime, st.EndTime, "
-                + "c.CinemaName, cr.RoomName, cr.RoomType, "
-                + "m.MovieID, m.MovieName, m.Duration, m.ImageURL, m.BasePrice "
-                + "FROM Ticket t "
-                + "JOIN Seat s ON t.SeatID = s.SeatID "
-                + "JOIN ShowTime st ON t.ShowTimeID = st.ShowTimeID "
-                + "JOIN Cinema c ON st.CinemaID = c.CinemaID "
-                + "JOIN CinemaRoom cr ON st.RoomID = cr.RoomID "
-                + "JOIN Movie m ON st.MovieID = m.MovieID "
-                + "WHERE t.OrderID = ?";
+        String sql = "SELECT t.TicketID, t.SeatID, t.ShowtimeID, t.OrderID, s.SeatRow, s.SeatNumber, s.SeatType, \n" +
+"                st.StartTime, st.EndTime, \n" +
+"                c.CinemaName, cr.RoomName, cr.RoomType, \n" +
+"                m.MovieID, m.MovieName, m.Duration, m.BasePrice\n" +
+"                FROM [dbo].[Ticket]  t \n" +
+"                JOIN Seat s ON t.SeatID = s.SeatID \n" +
+"                JOIN ShowTime st ON t.ShowTimeID = st.ShowTimeID \n" +
+"                JOIN Cinema c ON st.CinemaID = c.CinemaID \n" +
+"                JOIN CinemaRoom cr ON st.RoomID = cr.RoomID \n" +
+"                JOIN Movie m ON st.MovieID = m.MovieID \n" +
+"                WHERE t.OrderID = ?";
         
         try {
             PreparedStatement ps = conn.prepareStatement(sql);

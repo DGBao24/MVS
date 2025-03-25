@@ -38,11 +38,7 @@ public class MyBookingsController extends HttpServlet {
         if (orderIdParam != null && !orderIdParam.isEmpty()) {
             try {
                 int orderId = Integer.parseInt(orderIdParam);
-                ResultSet ticketDetails = dao.getTicketsDetailsByOrderID(orderId);
-                ResultSet comboDetails = dao.getOrderCombosByOrderID(orderId);
                 
-                request.setAttribute("ticketDetails", ticketDetails);
-                request.setAttribute("comboDetails", comboDetails);
                 request.setAttribute("selectedOrderId", orderId);
             } catch (NumberFormatException e) {
                 request.setAttribute("error", "Invalid order ID");

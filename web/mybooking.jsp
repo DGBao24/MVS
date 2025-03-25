@@ -1,7 +1,7 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="java.sql.ResultSet"%>
 <%@page import="java.sql.SQLException"%>
-<%@page import="java.util.List, java.util.HashMap, java.util.Map"%>
+<%@page import="java.util.List"%>
 <%@page import="entity.Order"%>
 <%@page import="java.text.NumberFormat, java.util.Locale"%>
 <%@page import="java.text.SimpleDateFormat"%>
@@ -251,8 +251,6 @@
             NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
             List<Order> orderList = (List<Order>) request.getAttribute("orderList");
-            ResultSet ticketDetails = (ResultSet) request.getAttribute("ticketDetails");
-            ResultSet comboDetails = (ResultSet) request.getAttribute("comboDetails");
             Integer selectedOrderId = (Integer) request.getAttribute("selectedOrderId");
             String error = (String) request.getAttribute("error");
         %>
@@ -279,7 +277,7 @@
                     
                     <% for (Order order : orderList) { %>
                         <div class="card order-card <%= (selectedOrderId != null && selectedOrderId == order.getOrderID()) ? "selected" : "" %>" 
-                             onclick="window.location.href='mybookings?orderId=<%= order.getOrderID() %>'">
+                             onclick="window.location.href='bookingdetail?orderId=<%= order.getOrderID() %>'">
                             <div class="order-info">
                                 <div class="info-item">
                                     <span class="info-label">Mã đơn hàng:</span>
@@ -308,98 +306,7 @@
                     <% } %>
                 </div>
                 
-                <% if (ticketDetails != null && ticketDetails.isBeforeFirst()) { %>
-                    <div class="order-details">
-                        <h3>Chi tiết đơn hàng #<%= selectedOrderId %></h3>
                         
-                        <%
-                            // Group tickets by movie
-                            Map<Integer, ResultSet> ticketsByMovie = new HashMap<>();
-                            
-                            try {
-                                // Store current position
-                                ticketDetails.beforeFirst();
-                                
-                                // Process results
-                                while (ticketDetails.next()) {
-                                    int movieId = ticketDetails.getInt("MovieID");
-                                    String movieName = ticketDetails.getString("MovieName");
-                                    String imageURL = ticketDetails.getString("ImageURL");
-                                    String cinemaName = ticketDetails.getString("CinemaName");
-                                    String roomName = ticketDetails.getString("RoomName");
-                                    String roomType = ticketDetails.getString("RoomType");
-                                    java.sql.Timestamp startTime = ticketDetails.getTimestamp("StartTime");
-                                    
-                                    // If we haven't seen this movie yet, create a ticket card for it
-                                    if (!ticketsByMovie.containsKey(movieId)) {
-                        %>
-                        <div class="card ticket-card">
-                            <img src="<%= imageURL != null ? imageURL : "images/default-movie.jpg" %>" alt="<%= movieName %>" class="ticket-image">
-                            <div class="ticket-details">
-                                <div class="movie-title"><%= movieName %></div>
-                                <ul class="ticket-info-list">
-                                    <li><i class="fas fa-map-marker-alt fa-icon"></i> <%= cinemaName %> | <%= roomName %> (<%= roomType %>)</li>
-                                    <li><i class="fas fa-calendar-alt fa-icon"></i> <%= dateFormat.format(startTime) %></li>
-                                    <li><i class="fas fa-ticket-alt fa-icon"></i> Ghế: 
-                                        <%
-                                            // Reset to beginning to count and display seats
-                                            ticketDetails.beforeFirst();
-                                            while (ticketDetails.next()) {
-                                                int currentMovieId = ticketDetails.getInt("MovieID");
-                                                if (currentMovieId == movieId) {
-                                                    String seatRow = ticketDetails.getString("SeatRow");
-                                                    int seatNumber = ticketDetails.getInt("SeatNumber");
-                                                    String seatType = ticketDetails.getString("SeatType");
-                                                    String seatDisplay = seatRow + seatNumber;
-                                        %>
-                                        <span class="seat-badge <%= "VIP".equals(seatType) ? "vip-seat" : "" %>">
-                                            <%= seatDisplay %>
-                                        </span>
-                                        <%
-                                                }
-                                            }
-                                        %>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                        <%
-                                        ticketsByMovie.put(movieId, null); // Mark as processed
-                                    }
-                                }
-                            } catch (SQLException e) {
-                                e.printStackTrace();
-                            }
-                        %>
-                        
-                        <% if (comboDetails != null && comboDetails.isBeforeFirst()) { %>
-                            <div class="card combo-section">
-                                <h4>Combo đã đặt</h4>
-                                <%
-                                    float comboTotal = 0;
-                                    comboDetails.beforeFirst();
-                                    while (comboDetails.next()) {
-                                        String comboName = comboDetails.getString("ComboItem");
-                                        int quantity = comboDetails.getInt("Quantity");
-                                        float price = comboDetails.getFloat("Price");
-                                        comboTotal += price;
-                                %>
-                                <div class="combo-item">
-                                    <div class="combo-name"><%= comboName %></div>
-                                    <div class="combo-quantity">x<%= quantity %></div>
-                                    <div class="combo-price"><%= currencyFormat.format(price) %></div>
-                                </div>
-                                <% } %>
-                                
-                                <div class="total-section">
-                                    <div>Tổng cộng:</div>
-                                    <div><%= currencyFormat.format(comboTotal) %></div>
-                                </div>
-                            </div>
-                        <% } %>
-                    </div>
-                <% } %>
-                
                 <a href="home" class="back-btn">
                     <i class="fas fa-arrow-left"></i> Quay lại trang chủ
                 </a>
