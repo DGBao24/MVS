@@ -865,4 +865,75 @@ public class BookingDAO extends DBConnection {
         }
     }
 
+    
+    
+     public List<Order> getOrdersByAccountID(int accountID) {
+         List<Order> orders = new ArrayList<>();
+         String sql = "SELECT * FROM [dbo].[Order] WHERE AccountID = ? AND Status = 'Completed' ORDER BY OrderDate DESC";
+         
+         try {
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ps.setInt(1, accountID);
+             ResultSet rs = ps.executeQuery();
+             
+             while (rs.next()) {
+                 Order order = new Order();
+                 order.setOrderID(rs.getInt("OrderID"));
+                 order.setAccountID(rs.getInt("AccountID"));
+                 order.setOrderDate(rs.getTimestamp("OrderDate"));
+                 order.setTotalAmount(rs.getFloat("TotalAmount"));
+                 order.setSeatQuantity(rs.getInt("SeatQuantity"));
+                 order.setComboQuantity(rs.getInt("ComboQuantity"));
+                 order.setPromotionID(rs.getInt("PromotionID"));
+                 order.setStatus(rs.getString("Status"));
+                 orders.add(order);
+             }
+         } catch (SQLException ex) {
+             Logger.getLogger(BookingDAO.class.getName()).log(Level.SEVERE, null, ex);
+         }
+         
+         return orders;
+     }
+        public ResultSet getTicketsDetailsByOrderID(int orderID) {
+         String sql = "SELECT t.TicketID, t.SeatID, t.ShowTimeID, t.OrderID, "
+                 + "s.SeatRow, s.SeatNumber, s.SeatType, "
+                 + "st.StartTime, st.EndTime, "
+                 + "c.CinemaName, cr.RoomName, cr.RoomType, "
+                 + "m.MovieID, m.MovieName, m.Duration, m.ImageURL, m.BasePrice "
+                 + "FROM Ticket t "
+                 + "JOIN Seat s ON t.SeatID = s.SeatID "
+                 + "JOIN ShowTime st ON t.ShowTimeID = st.ShowTimeID "
+                 + "JOIN Cinema c ON st.CinemaID = c.CinemaID "
+                 + "JOIN CinemaRoom cr ON st.RoomID = cr.RoomID "
+                 + "JOIN Movie m ON st.MovieID = m.MovieID "
+                 + "WHERE t.OrderID = ?";
+         
+         try {
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ps.setInt(1, orderID);
+             return ps.executeQuery();
+         } catch (SQLException ex) {
+             Logger.getLogger(BookingDAO.class.getName()).log(Level.SEVERE, null, ex);
+         }
+         
+         return null;
+     }
+     
+     public ResultSet getOrderCombosByOrderID(int orderID) {
+         String sql = "SELECT oc.OrderComboID, oc.OrderID, oc.ComboID, oc.Quantity, oc.Price, "
+                 + "c.ComboItem, c.Description "
+                 + "FROM OrderCombo oc "
+                 + "JOIN Combo c ON oc.ComboID = c.ComboID "
+                 + "WHERE oc.OrderID = ?";
+         
+         try {
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ps.setInt(1, orderID);
+             return ps.executeQuery();
+         } catch (SQLException ex) {
+             Logger.getLogger(BookingDAO.class.getName()).log(Level.SEVERE, null, ex);
+         }
+         
+         return null;
+     }
 }
