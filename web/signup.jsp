@@ -48,7 +48,7 @@
                                     </div>
                                     <div class="col-12">
                                         <label for="phone" class="form-label">Phone Number <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" name="phone" id="phone" placeholder="123-456-7890" required>
+                                        <input type="text" class="form-control" name="phone" id="phone" placeholder="0000-000-000" required>
                                     </div>
                                     <div class="col-12">
 
