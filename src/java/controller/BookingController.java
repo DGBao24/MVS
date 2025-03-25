@@ -22,6 +22,7 @@ import java.util.logging.Logger;
 import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 @WebServlet(name = "BookingController", urlPatterns = {"/book"})
@@ -40,7 +41,8 @@ public class BookingController extends HttpServlet {
         String roomID = request.getParameter("RoomID");
         String[] seatIDs = request.getParameterValues("SeatID");
         Integer accountId = (Integer) session.getAttribute("CustomerID");
-
+        
+        List<String> seatArray = (seatIDs != null) ? Arrays.asList(seatIDs) : new ArrayList<>();
         int mid = Integer.parseInt(movieID);
         Movie movie = dao.getMovieById(mid);
         request.setAttribute("movie", movie);
@@ -114,7 +116,7 @@ public class BookingController extends HttpServlet {
                     request.setAttribute("mess", "Vui lòng chọn ít nhất một ghế!");
                 } else {
                     boolean success = true;
-
+                    int seatQuantity = seatArray.size();
                     // Lấy ShowtimeID từ thông tin đã chọn
                     Timestamp timestamp = Timestamp.valueOf(startTime.split("\\.")[0]);
                     int cid = Integer.parseInt(cinemaID);
@@ -129,7 +131,7 @@ public class BookingController extends HttpServlet {
                         try {
                             Timestamp orderDate = new Timestamp(System.currentTimeMillis());
 
-                            dao.insertOrder(accountId, orderDate, "Processing");
+                            dao.insertOrder(accountId, orderDate,seatQuantity, "Processing");
 
                             Order lastOrder = dao.getLatestOrder();
                             for (String seat : seatIDs) {
