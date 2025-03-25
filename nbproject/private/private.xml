@@ -3,25 +3,9 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/pdatt/Documents/MovieTicket/MVS/web/payment.jsp</file>
-            <file>file:/C:/Users/pdatt/Documents/MovieTicket/MVS/src/java/controller/ComboPromotionController.java</file>
-            <file>file:/C:/Users/pdatt/Documents/MovieTicket/MVS/src/java/model/MovieDAO.java</file>
-            <file>file:/C:/Users/pdatt/Documents/MovieTicket/MVS/src/java/controller/OrderStatus.java</file>
-            <file>file:/C:/Users/pdatt/Documents/MovieTicket/MVS/src/java/entity/Ticket.java</file>
-            <file>file:/C:/Users/pdatt/Documents/MovieTicket/MVS/src/java/controller/MovieController.java</file>
-            <file>file:/C:/Users/pdatt/Documents/MovieTicket/MVS/web/select_ticket.jsp</file>
-            <file>file:/C:/Users/pdatt/Documents/MovieTicket/MVS/src/java/utils/Config.java</file>
-            <file>file:/C:/Users/pdatt/Documents/MovieTicket/MVS/web/paymentResult.jsp</file>
-            <file>file:/C:/Users/pdatt/Documents/MovieTicket/MVS/src/java/entity/Order.java</file>
-            <file>file:/C:/Users/pdatt/Documents/MovieTicket/MVS/src/java/entity/OrderCombo.java</file>
-            <file>file:/C:/Users/pdatt/Documents/MovieTicket/MVS/src/java/model/BookingDAO.java</file>
-            <file>file:/C:/Users/pdatt/Documents/MovieTicket/MVS/src/java/model/CinemaRoomDAO.java</file>
-            <file>file:/C:/Users/pdatt/Documents/MovieTicket/MVS/src/java/controller/OrderController.java</file>
-            <file>file:/C:/Users/pdatt/Documents/MovieTicket/MVS/src/java/controller/BookingController.java</file>
-            <file>file:/C:/Users/pdatt/Documents/MovieTicket/MVS/web/ticket-confirmation.jsp</file>
-            <file>file:/C:/Users/pdatt/Documents/MovieTicket/MVS/src/java/controller/ProfileController.java</file>
-            <file>file:/C:/Users/pdatt/Documents/MovieTicket/MVS/src/java/utils/SeatResetScheduler.java</file>
-            <file>file:/C:/Users/pdatt/Documents/MovieTicket/MVS/src/java/utils/SeatResetServletContextListener.java</file>
+            <file>file:/C:/Users/pdatt/Documents/MovieTicket/MVS/src/java/model/DBConnection.java</file>
+            <file>file:/C:/Users/pdatt/Documents/MovieTicket/MVS/src/java/controller/PromotionController.java</file>
+            <file>file:/C:/Users/pdatt/Documents/MovieTicket/MVS/src/java/model/DAOPromotion.java</file>
         </group>
     </open-files>
 </project-private>
